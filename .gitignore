@@ -1,0 +1,8 @@
+
+# do not push
+node_modules/
+**/node_modules/
+
+WBES_environment/
+**/PyEnv/
+

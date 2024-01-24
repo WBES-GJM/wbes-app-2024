@@ -1,0 +1,3 @@
+# install the following in the python environment
+
+django

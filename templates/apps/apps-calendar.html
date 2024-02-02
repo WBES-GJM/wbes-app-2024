@@ -21,7 +21,7 @@
             <div class="page-content">
                 <div class="container-fluid">
                     <!-- start page title -->
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                                 <h4 class="mb-sm-0 font-size-18">Calendar</h4>
@@ -35,7 +35,7 @@
 
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- end page title -->
 
                     <div class="row">
@@ -45,14 +45,72 @@
                                 <div class="col-xl-3 col-lg-4">
                                     <div class="card">
                                         <div class="card-body">
+
                                             <div class="d-grid">
-                                                <button class="btn font-16 btn-primary" id="btn-new-event"><i
-                                                        class="mdi mdi-plus-circle-outline"></i> Create
-                                                    New Event
+                                                {% if no_room_selected or room_nonexistent %}
+                                                <button class="btn font-16 btn-primary" id="btn-new-event" disabled>
+                                                {% else %}
+                                                <button class="btn font-16 btn-primary" id="btn-new-event">
+                                                {% endif %}
+                                                <!-- <button class="btn font-16 btn-primary" id="btn-new-event"> -->
+                                                    <i class="mdi mdi-plus-circle-outline"></i> 
+                                                    New Booking
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="row justify-content-center mt-5">
+                                                <div class="col-lg-12 col-sm-6">
+                                                    <img src="{% static 'images/undraw-calendar.svg'%}" alt=""
+                                                        class="img-fluid d-block">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <label class="form-label">Building</label>
+                                                <select class="form-control form-select" name="building"
+                                                    id="select-building" required>
+                                                    <option selected> --Select-- </option>
+                                                    {% for bd in buildings %}
+                                                    {% if selected_room and selected_room.building_id == bd.id %}
+                                                    <option value="{{bd.id}}" selected>{{bd}}</option>
+                                                    {% else%}
+                                                    <option value="{{bd.id}}">{{bd}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="invalid-feedback">Please select a valid event
+                                                    category</div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <label class="form-label">Room</label>
+                                                <select class="form-control form-select" name="room"
+                                                    id="select-conference-room" required>
+                                                    {% if not rooms%}
+                                                        <option selected> --Select-- </option>
+                                                    {% else %}
+                                                        {% for rm in rooms %}
+                                                        {% if selected_room and selected_room.room_id == rm.id %}
+                                                        <option value="{{rm.id}}" selected>{{rm}}</option>
+                                                        {% else%}
+                                                        <option value="{{rm.id}}">{{rm}}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% endif %}
+                                                </select>
+                                                <div class="invalid-feedback">Please select a valid event
+                                                    category</div>
+                                            </div>
+
+                                            <div class="mt-3 d-grid">
+                                                <button class="btn font-16 btn-primary" id="btn-submit-room"
+                                                disabled onclick="submitRoom()">
+                                                    See Schedule of Room
                                                 </button>
                                             </div>
 
-                                            <div id="external-events" class="mt-2">
+                                            <!-- NOT USED; NOT DISPLAYED; NOT NEEDED -->
+                                            <div id="external-events" class="mt-2" style="display: none;">
                                                 <br>
                                                 <p class="text-muted">Drag and drop your event or click in the calendar</p>
                                                 <div class="external-event fc-event text-success bg-success-subtle"
@@ -82,13 +140,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row justify-content-center mt-5">
-                                                <div class="col-lg-12 col-sm-6">
-                                                    <img src="{% static 'images/undraw-calendar.svg'%}" alt=""
-                                                        class="img-fluid d-block">
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
                                 </div> <!-- end col-->
@@ -96,7 +147,19 @@
                                 <div class="col-xl-9 col-lg-8">
                                     <div class="card">
                                         <div class="card-body">
+                                            {% if no_room_selected %}
+                                            <div id="calendar" style="display: none;"></div>
+                                            <div>
+                                                Please select a room to view schedules
+                                            </div>
+                                            {% elif room_nonexistent %}
+                                            <div id="calendar" style="display: none;"></div>
+                                            <div>
+                                                Sorry, room cannot be found! Please contact administrator if this is a concern.
+                                            </div>
+                                            {% else %}
                                             <div id="calendar"></div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div> <!-- end col -->
@@ -106,45 +169,106 @@
                             <div style='clear:both'></div>
 
 
-                            <!-- Add New Event MODAL -->
+                            <!-- Add New Object MODAL -->
                             <div class="modal fade" id="event-modal" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header py-3 px-4 border-bottom-0">
-                                            <h5 class="modal-title" id="modal-title">Event</h5>
+                                            <h5 class="modal-title" id="modal-title">New Booking</h5>
 
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-hidden="true"></button>
 
                                         </div>
                                         <div class="modal-body p-4">
-                                            <form class="needs-validation" name="event-form" id="form-event" novalidate>
+                                            <form class="needs-validation" name="newbooking_form" id="form-event" novalidate>
                                                 <div class="row">
                                                     <div class="col-12">
                                                         <div class="mb-3">
-                                                            <label class="form-label">Event Name</label>
-                                                            <input class="form-control" placeholder="Insert Event Name"
-                                                                type="text" name="title" id="event-title" required
-                                                                value="" />
-                                                            <div class="invalid-feedback">Please provide a valid event name
+                                                            <label class="form-label">Client Name</label>
+                                                            <input id="newbooking-client-input"
+                                                                class="form-control" placeholder="Insert Client Name"
+                                                                type="text" name="title"  required value="" autocomplete="off"/>
+                                                            <input id="newbooking-client-value" type="hidden" 
+                                                                name="newbooking_client_id">
+                                                            <div id="newbooking-client-dropdown-menu"
+                                                                class="dropdown-menu dropdown-menu-end" 
+                                                                style="margin: -15px 12px 0 12px; left: 0 !important;">
+                                                                <!-- <a class="dropdown-item" href="#">hello</a> -->
+                                                            </div>
+                                                            <div class="invalid-feedback">
+                                                                Please provide a valid event name
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-12">
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Category</label>
-                                                            <select class="form-control form-select" name="category"
-                                                                id="event-category" required>
-                                                                <option selected> --Select-- </option>
-                                                                <option value="bg-danger">Danger</option>
-                                                                <option value="bg-success">Success</option>
-                                                                <option value="bg-primary">Primary</option>
-                                                                <option value="bg-info">Info</option>
-                                                                <option value="bg-dark">Dark</option>
-                                                                <option value="bg-warning">Warning</option>
+                                                    <div class="col-12" id="newbooking-start-datetime">
+                                                        <div class="mb-3" >
+                                                            <label class="form-label">Start Date</label>
+                                                            <input type="date" id="newbooking-start-date-input" 
+                                                                name="newbooking_start_date_input" class="form-control mb-1">
+                                                            <select class="form-control form-select" 
+                                                                name="newbooking_start_time_input">
+                                                                <option value="8" selected>8:00 AM</option>
+                                                                <option value="9">9:00 AM</option>
+                                                                <option value="10">10:00 AM</option>
+                                                                <option value="11">11:00 AM</option>
+                                                                <option value="12">12:00 PM</option>
+                                                                <option value="13">1:00 PM</option>
+                                                                <option value="14">2:00 PM</option>
+                                                                <option value="15">3:00 PM</option>
+                                                                <option value="16">4:00 PM</option>
+                                                                <option value="17">5:00 PM</option>
+                                                                <option value="18">6:00 PM</option>
+                                                                <option value="19">7:00 PM</option>
+                                                                <option value="20">8:00 PM</option>
+                                                                <option value="21">9:00 PM</option>
+                                                                <option value="22">10:00 PM</option>
                                                             </select>
-                                                            <div class="invalid-feedback">Please select a valid event
-                                                                category</div>
+                                                            <!-- <div class="invalid-feedback">
+                                                                Please select a valid event category
+                                                            </div> -->
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12" id="newbooking-end-datetime" style="display: none;">
+                                                        <div class="mb-3" >
+                                                            <label class="form-label">End Date</label>
+                                                            <input type="date" id="newbooking-end-date-input" 
+                                                                name="newbooking_end_date_input" class="form-control mb-1">
+                                                            <select class="form-control form-select" 
+                                                                name="newbooking_end_time_input"
+                                                                id="newbooking-end-time-input">
+                                                                <option value="8" selected>8:00 AM</option>
+                                                                <option value="9">9:00 AM</option>
+                                                                <option value="10">10:00 AM</option>
+                                                                <option value="11">11:00 AM</option>
+                                                                <option value="12">12:00 PM</option>
+                                                                <option value="13">1:00 PM</option>
+                                                                <option value="14">2:00 PM</option>
+                                                                <option value="15">3:00 PM</option>
+                                                                <option value="16">4:00 PM</option>
+                                                                <option value="17">5:00 PM</option>
+                                                                <option value="18">6:00 PM</option>
+                                                                <option value="19">7:00 PM</option>
+                                                                <option value="20">8:00 PM</option>
+                                                                <option value="21">9:00 PM</option>
+                                                                <option value="22">10:00 PM</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12" id="newbooking-duration-hours">
+                                                        <div class="mb-3">
+                                                            <label for="newbooking-duration-hours-input">Duration (hours)</label>
+                                                            <input type="number" class="form-control" 
+                                                                id="newbooking-duration-hours-input" 
+                                                                name="newbooking_duration_hours_input"
+                                                                min="1" value="1" placeholder="Insert Number of Hours" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12" id="">
+                                                        <div class="mb-1 mt-1">
+                                                            <input type="checkbox" class="form-check-input" 
+                                                                id="newbooking-check-use-end" name="newbooking_check_use_end">
+                                                            <label for="newbooking-check-use-end">Use End Date instead</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -188,5 +312,110 @@
 <script src="{% static 'libs/@fullcalendar/interaction/main.min.js' %}"></script>
 
 <!-- Calendar init -->
+<script>
+    // For calendar.init
+    var BOOKINGS = '{{ bookings | safe }}';
+
+    // For selection of building and rooms
+    $('#select-building').on('change', function(e) {
+        $.ajax({
+            url: `get_rooms`,
+            data: {building_id: this.value},
+            success: function (response) {
+                
+                $('#select-conference-room option').remove();
+                disableSubmitRoom(false);
+
+                if (response.rooms) {
+                    for (const room of JSON.parse(response.rooms)) {
+                        $('#select-conference-room').append(
+                            $("<option>").text(room.name).attr('value', room.id)
+                        );
+                    }
+                }
+            },
+        });
+    });
+    
+    $('#select-conference-room').on('change', function(e) {
+        disableSubmitRoom(this.value === '{{ selected_room.room_id }}');
+    });
+
+    $('#newbooking-client-input').on('focusout', function () {
+        $('#newbooking-client-dropdown-menu').removeClass('show');
+    });
+
+    $('#newbooking-client-input').on('focusin', function () {
+        searchClient($('#newbooking-client-input').val());
+    });
+
+    $('#newbooking-client-input').on('input', function () {
+        searchClient(this.value);
+    })
+
+    $('#newbooking-check-use-end').on('change', function () {
+        if (this.checked) {
+            $('#newbooking-end-datetime').show();
+            $('#newbooking-duration-hours').hide();
+            $('#newbooking-duration-hours-input').attr('required', false);
+            $('#newbooking-end-date-input').attr('required', true);
+            $('#newbooking-end-time-input').attr('required', true);
+        } else {
+            $('#newbooking-duration-hours').show();
+            $('#newbooking-end-datetime').hide();
+            $('#newbooking-duration-hours-input').attr('required', true);
+            $('#newbooking-end-date-input').attr('required', false);
+            $('#newbooking-end-time-input').attr('required', false);
+        }
+    })
+    
+    function searchClient(value) {
+        if (value.length < 3) {
+            $('#newbooking-client-value').val('');
+            $('#newbooking-client-dropdown-menu .dropdown-item').remove();
+            $('#newbooking-client-dropdown-menu').removeClass('show');
+            return;
+        };
+        
+        $.ajax({
+            url: `get_clients`,
+            data: {search_query: value},
+            success: function (response) {
+                $('#newbooking-client-dropdown-menu .dropdown-item').remove();
+                if (response.clients) {
+                    for (const client of JSON.parse(response.clients)) {
+
+                        const clientElement = $("<a>").text(client.name)
+                            .attr('href', '#')
+                            .addClass('dropdown-item')
+
+                        clientElement.on('click', 
+                            () => $('#newbooking-client-value').val(client.id));
+
+                        $('#newbooking-client-dropdown-menu').append(clientElement);
+                    }
+                } else {
+                    $('#newbooking-client-dropdown-menu').append(
+                        $("<a>").text('No Available Client Found')
+                            .addClass('dropdown-item')
+                    );
+                }
+                $('#newbooking-client-dropdown-menu').addClass('show');
+            },
+        });
+    }
+
+    function disableSubmitRoom(value) {
+        $('#btn-submit-room').attr('disabled', value);
+    }
+
+    function submitRoom() {
+        const value = $('#select-conference-room').val();
+        const urlList = window.location.href.split('/');
+        urlList.pop();
+        urlList.push(value);
+        window.location = urlList.join('/');
+    }
+</script>
 <script src="{% static 'js/pages/calendar.init.js' %}"></script>
 {% endblock extra_js %}

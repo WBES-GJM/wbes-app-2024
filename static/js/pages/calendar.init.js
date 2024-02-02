@@ -1,1 +1,183 @@
-!function(v){"use strict";function e(){}e.prototype.init=function(){var a=v("#event-modal"),t=v("#modal-title"),n=v("#form-event"),l=null,i=null,r=document.getElementsByClassName("needs-validation"),l=null,i=null,e=new Date,s=e.getDate(),d=e.getMonth(),e=e.getFullYear(),s=(new FullCalendarInteraction.Draggable(document.getElementById("external-events"),{itemSelector:".external-event",eventData:function(e){return{title:e.innerText,className:v(e).data("class")}}}),[{title:"All Day Event",start:new Date(e,d,1)},{title:"Long Event",start:new Date(e,d,s-5),end:new Date(e,d,s-2),className:"bg-warning"},{id:999,title:"Repeating Event",start:new Date(e,d,s-3,16,0),allDay:!1,className:"bg-info"},{id:999,title:"Repeating Event",start:new Date(e,d,s+4,16,0),allDay:!1,className:"bg-primary"},{title:"Meeting",start:new Date(e,d,s,10,30),allDay:!1,className:"bg-success"},{title:"Lunch",start:new Date(e,d,s,12,0),end:new Date(e,d,s,14,0),allDay:!1,className:"bg-danger"},{title:"Birthday Party",start:new Date(e,d,s+1,19,0),end:new Date(e,d,s+1,22,30),allDay:!1,className:"bg-success"},{title:"Click for Google",start:new Date(e,d,28),end:new Date(e,d,29),url:"http://google.com/",className:"bg-dark"}]),e=(document.getElementById("external-events"),document.getElementById("calendar"));function o(e){a.modal("show"),n.removeClass("was-validated"),n[0].reset(),v("#event-title").val(),v("#event-category").val(),t.text("Add Event"),i=e}var c=new FullCalendar.Calendar(e,{plugins:["bootstrap","interaction","dayGrid","timeGrid"],editable:!0,droppable:!0,selectable:!0,defaultView:"dayGridMonth",themeSystem:"bootstrap",header:{left:"prev,next today",center:"title",right:"dayGridMonth,timeGridWeek,timeGridDay,listMonth"},eventClick:function(e){a.modal("show"),n[0].reset(),l=e.event,v("#event-title").val(l.title),v("#event-category").val(l.classNames[0]),i=null,t.text("Edit Event"),i=null,v("#btn-delete-event").show()},dateClick:function(e){o(e)},events:s});c.render(),v(n).on("submit",function(e){e.preventDefault();v("#form-event :input");var e=v("#event-title").val(),t=v("#event-category").val();!1===r[0].checkValidity()?(event.preventDefault(),event.stopPropagation(),r[0].classList.add("was-validated")):(l?(l.setProp("title",e),l.setProp("classNames",[t])):(e={title:e,start:i.date,allDay:i.allDay,className:t},c.addEvent(e)),a.modal("hide"))}),v("#btn-delete-event").on("click",function(e){l&&(l.remove(),l=null,a.modal("hide"))}),v("#btn-new-event").on("click",function(e){o({date:new Date,allDay:!0}),v("#btn-delete-event").hide()})},v.CalendarPage=new e,v.CalendarPage.Constructor=e}(window.jQuery),function(){"use strict";window.jQuery.CalendarPage.init()}();
+/*
+Template Name: Dason - Admin & Dashboard Template
+Author: Themesdesign
+Website: https://themesdesign.in/
+Contact: themesdesign.in@gmail.com
+File: Calendar init js
+*/
+
+! function ($) {
+    "use strict";
+
+    var CalendarPage = function () {};
+
+    CalendarPage.prototype.init = function () {
+
+            var addEvent = $("#event-modal");
+            var modalTitle = $("#modal-title");
+            var formEvent = $("#form-event");
+            var forms = $('.needs-validation');
+            var selectedEvent = null;
+            var newEventData = null;
+            var eventObject = null;
+            /* initialize the calendar */
+
+            var date = new Date();
+            var d = date.getDate();
+            var m = date.getMonth();
+            var y = date.getFullYear();
+            var Draggable = FullCalendarInteraction.Draggable;
+            var externalEventContainerEl = document.getElementById('external-events');
+            // init dragable
+            new Draggable(externalEventContainerEl, {
+                itemSelector: '.external-event',
+                eventData: function (eventEl) {
+                    return {
+                        title: eventEl.innerText,
+                        className: $(eventEl).data('class')
+                    };
+                }
+            });
+
+            // Bookings data
+            // [
+                // {
+                //     id: 999,
+                //     title: 'Repeating Event',
+                //     start: new Date(y, m, d - 3, 16, 0),
+                //     end: new Date(y, m, d - 2),
+                //     allDay: false,
+                //     url: 'http://google.com/',
+                //     className: 'bg-info'
+                // }
+            // ];
+            var fetchBookings = BOOKINGS ? JSON.parse(BOOKINGS) : [];
+            var defaultEvents = [];
+            var formatDate = (argsList) => {
+                return new Date(
+                    argsList[0],
+                    argsList[1],
+                    argsList[2],
+                    argsList[3],
+                    argsList[4],
+                )
+            }
+            for (const bk of fetchBookings) {
+                bk.start = formatDate(bk.start);
+                bk.end = formatDate(bk.end);
+                defaultEvents.push(bk);
+            }
+
+            // Elements
+            // var draggableEl = document.getElementById('external-events');
+            var calendarEl = document.getElementById('calendar');
+
+            function addNewEvent(info) {
+                // for date and time
+                $('#newbooking-start-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
+                $('#newbooking-end-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
+
+                // preset codes
+                addEvent.modal('show');
+                formEvent.removeClass("was-validated");
+                formEvent[0].reset();
+
+                $("#form-client-input").val();
+                $('#event-category').val();
+                modalTitle.text('Add Event');
+                newEventData = info;
+            }
+
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['bootstrap', 'interaction', 'dayGrid', 'timeGrid'],
+                editable: true,
+                droppable: true,
+                selectable: true,
+                defaultView: 'dayGridMonth',
+                themeSystem: 'bootstrap',
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+                },
+                eventClick: function (info) {
+                    // for date and time
+                    $('#newbooking-start-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
+                    $('#newbooking-end-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
+
+                    // preset codes
+                    addEvent.modal('show');
+                    formEvent[0].reset();
+                    selectedEvent = info.event;
+                    $("#newbooking-client-input").val(selectedEvent.title); // except this
+                    $('#event-category').val(selectedEvent.classNames[0]);
+                    newEventData = null;
+                    modalTitle.text('Edit Event');
+                    newEventData = null;
+                    $("#btn-delete-event").show();
+                },
+                dateClick: function (info) {
+                    addNewEvent(info);
+                },
+                events: defaultEvents
+            });
+            calendar.render();
+
+            /*Add new event*/
+            // Form to add new event
+
+            $(formEvent).on('submit', function (ev) {
+                ev.preventDefault();
+                var inputs = $('#form-event :input');
+                var updatedTitle = $("#form-client-input").val();
+                var updatedCategory = $('#event-category').val();
+
+                // validation
+                if (forms[0].checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    forms[0].classList.add('was-validated');
+                } else {
+                    if (selectedEvent) {
+                        selectedEvent.setProp("title", updatedTitle);
+                        selectedEvent.setProp("classNames", [updatedCategory]);
+                    } else {
+                        var newEvent = {
+                            title: updatedTitle,
+                            start: newEventData.date,
+                            allDay: newEventData.allDay,
+                            className: updatedCategory
+                        }
+                        calendar.addEvent(newEvent);
+                    }
+                    addEvent.modal('hide');
+                }
+            });
+
+            $("#btn-delete-event").on('click', function (e) {
+                if (selectedEvent) {
+                    selectedEvent.remove();
+                    selectedEvent = null;
+                    addEvent.modal('hide');
+                }
+            });
+
+            $("#btn-new-event").on('click', function (e) {
+                addNewEvent({
+                    date: new Date(),
+                    allDay: true,
+                });
+                $("#btn-delete-event").hide();
+            });
+
+        },
+        //init
+        $.CalendarPage = new CalendarPage, $.CalendarPage.Constructor = CalendarPage
+}(window.jQuery),
+
+//initializing 
+function ($) {
+    "use strict";
+    $.CalendarPage.init()
+}(window.jQuery);

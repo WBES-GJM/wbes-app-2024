@@ -11,7 +11,12 @@ from .views import (
     apps_ecommerce_shops_view,
     apps_ecommerce_seller_view,
     apps_ecommerce_seller_details_view,
-    apps_calendar_calendar_view,
+    
+    # calendar
+    apps_calendar_calendar_view, 
+    apps_calendar_get_rooms, 
+    apps_calendar_get_clients,
+    
     apps_chat_chat_view,
     apps_email_inbox_view,
     apps_email_read_view,
@@ -63,8 +68,13 @@ urlpatterns = [
     path("ecommerce/shops", view=apps_ecommerce_shops_view, name="ecommerce.shops"),
     path("ecommerce/seller", view=apps_ecommerce_seller_view,name="ecommerce.seller"),
     path("ecommerce/seller_details", view=apps_ecommerce_seller_details_view,name="ecommerce.seller_details"),
-    # calendar
-    path("calendar", view=apps_calendar_calendar_view, name="calendar"),
+    
+    # CALENDAR
+    path("calendar/", view=apps_calendar_calendar_view, name="calendar"),
+    path("calendar/<int:room_id>", view=apps_calendar_calendar_view, name="calendar"),
+    path("calendar/get_rooms/", view=apps_calendar_get_rooms, name="calendar.get.rooms"),
+    path("calendar/get_clients/", view=apps_calendar_get_clients, name="calendar.get.clients"),
+    
     # chat
     path("chat", view=apps_chat_chat_view, name="chat"),
     # Email
@@ -80,5 +90,5 @@ urlpatterns = [
     path("users/employee/<int:id>", view=apps_users_employee_view, name="users.employee"),
     path("users/profile", view=apps_users_profile_view,name="users.profile"),
     # Horizontal
-    path("horizontal", view=apps_horizontal_horizontal_view, name="horizontal"),
+    # path("horizontal", view=apps_horizontal_horizontal_view, name="horizontal"),
 ]

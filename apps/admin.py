@@ -3,7 +3,9 @@ from django.apps import apps
 
 # Register your models here.
 class ListAdminMixin(object):
+    readonly_fields = ('id',)
     def __init__(self, model, admin_site):
+        self.list_display = ("id",) + self.list_display
         super(ListAdminMixin, self).__init__(model, admin_site)
 
 # Register all models for admin panel

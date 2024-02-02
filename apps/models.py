@@ -8,9 +8,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 
-# class User(AbstractUser):
-#     id = models.BigAutoField(primary_key=True, unique=False)
-#     pass
+
+# class UserProfile(models.Model):
+
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # additional info of the user
+
 
 class Contract(models.Model):
     
@@ -85,7 +88,8 @@ class MailBoxService(models.Model):
     new_note = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Mailbox: {self.mail_box_number} and {self.additional_name} with company:{self.company_name }\n owner: {self.owner_name}"
+        return f"Mailbox: {self.mail_box_number} and {self.additional_name} " \
+            + f"with company:{self.company_name }\n owner: {self.owner_name}"
 
 class CopyServices(models.Model): 
     
@@ -94,7 +98,8 @@ class CopyServices(models.Model):
     BINDING = [('stapled', 'Stapled'), ('spiral_bound', 'Spiral Bound'), ('booklet', 'Booklet')]
     ORDER_STATUS = [('processing', 'Processing'), ('completed', 'Completed'), ('shipped', 'Shipped'), ('Received', 'Received')]
     SIZE = [('8-1/2 x 11', 'Standard Letter 8-1/2 x 11'), ('8-1/2 x 14', 'Standard Legal 8-1/2 x 14'), ('11 x 17', '11 x 17')]
-    DELIVERY = [('mailbox', 'Mailbox'), ('office', 'Office'), ('pickup_at_reception', 'Pickup at Reception'), ('local_delivery', 'Local Delivery')]
+    DELIVERY = [('mailbox', 'Mailbox'), ('office', 'Office'), ('pickup_at_reception', 'Pickup at Reception'), 
+                ('local_delivery', 'Local Delivery')]
     CODE = [('happy', 'Happy'), ('truth', 'Truth'), ('smile', 'Smile'), ('good', 'Good'), ('enjoy', 'Enjoy')]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
@@ -182,7 +187,9 @@ class Location(models.Model):
 
 #     def __str__(self):
 #         duration = self.calculate_duration()
-#         return f"{self.office_name}:  Contract Value:  ${self.lease_price_office} payable on: {self.end_date}  {self.get_lessee()} Contract duration: {duration} days from {self.start_date} to {self.end_date}"
+#         return f"{self.office_name}:  Contract Value:  ${self.lease_price_office} "\
+#           +f"payable on: {self.end_date}  {self.get_lessee()} "\
+#           +f"Contract duration: {duration} days from {self.start_date} to {self.end_date}"
 
 class Suite(models.Model):
     SUITE_TYPE_CHOICES = [
@@ -216,11 +223,14 @@ class Office(models.Model):
         ('S11', 'S11'), ('S12', 'S12'), ('S13', 'S13'), ('S14', 'S14'), ('S15', 'S15'), ('S16', 'S16') 
     ]
     SCENARIOS = [
-        ('one tenant lease', 'one tenant lease'), ('Joint Tenancy','Joint Tenancy'), ('Subletting','Subletting'), ('Separate Leases','Separate Leases'), ('Cotenancy','Cotenancy'), 
+        ('one tenant lease', 'one tenant lease'), ('Joint Tenancy','Joint Tenancy'), ('Subletting','Subletting'), 
+        ('Separate Leases','Separate Leases'), ('Cotenancy','Cotenancy'), 
         ('Room Rental Agreement','Room Rental Agreement')
     ]
     AMENITIES = [
-        ('phone','phone'), ('fax','fax'), ('TV','TV'), ('Computer','Computer'), ('Projector','Projector'), ('Secretary','Secretary'), ('Additonal Space','Additional Space'), ('storage','storage'), ('assistant','assistant'), ('extra chair','extra chair'),
+        ('phone','phone'), ('fax','fax'), ('TV','TV'), ('Computer','Computer'), ('Projector','Projector'), 
+        ('Secretary','Secretary'), ('Additonal Space','Additional Space'), ('storage','storage'), 
+        ('assistant','assistant'), ('extra chair','extra chair'),
     ]
     PERIOD = [
         ('setup fee', 'setup fee'), ('one time fee', 'one time fee'), ('one time charge', 'one time charge'), ('hourly','hourly'), 
@@ -234,9 +244,9 @@ class Office(models.Model):
     sq_ft = models.DecimalField(max_digits=20, decimal_places=2)
     rent = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
     payment_period = models.CharField(max_length=17, choices=PERIOD)
-    default_free_hours = models.IntegerField(default=4)
-    free_hours = models.IntegerField(help_text="carry over hours")
-    term_lease = models.IntegerField(help_text="number of payments") 
+    default_free_hours = models.PositiveIntegerField(default=4)
+    free_hours = models.PositiveIntegerField(help_text="carry over hours")
+    term_lease = models.PositiveIntegerField(help_text="number of payments") 
     lease_price_office = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     contract_file = models.FileField(upload_to='contracts/')
     start_date = models.DateTimeField(auto_now_add=True)
@@ -312,8 +322,23 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
 
         # Remove duplicates from phone and email lists
-        phones = [phone.strip() for phone in [self.main_phone_company, self.alt_phone_company, self.alt_mobile_company, self.home_phone_company, self.cell_company] if phone is not None and phone.strip()]
-        emails = [email.strip() for email in [self.alt_email_2_company, self.alt_email_1_company, self.cc_email_company, self.main_email_company] if email is not None and email.strip()]
+        phones = [
+            phone.strip() for phone in [
+                self.main_phone_company, 
+                self.alt_phone_company, 
+                self.alt_mobile_company, 
+                self.home_phone_company, 
+                self.cell_company
+            ] if phone is not None and phone.strip()
+        ]
+        emails = [
+            email.strip() for email in [
+                self.alt_email_2_company, 
+                self.alt_email_1_company, 
+                self.cc_email_company, 
+                self.main_email_company
+            ] if email is not None and email.strip()
+        ]
 
         # Remove duplicates by converting to a set and back to a list
         phones = list(set(phones))
@@ -324,7 +349,8 @@ class Company(models.Model):
         self.list_of_email = '\n'.join(emails)
 
         # Concatenate the four fields into the 'employee' field
-        self.address_company = f"{self.street_number_company} {self.street_name_company}  {self.city_company}, {self.state_company} {self.zip_company}"
+        self.address_company = f"{self.street_number_company} {self.street_name_company}  " + \
+            f"{self.city_company}, {self.state_company} {self.zip_company}"
         super(Company, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -337,7 +363,7 @@ class Owner(models.Model):
         ('Dr.', 'Dr.'),
         ('Ms.', 'Ms.')
     ]
-        
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     name_prefix_owner = models.CharField(max_length=30, choices=NAME_PREFIX, null=True)
@@ -379,8 +405,23 @@ class Owner(models.Model):
 
     def save(self, *args, **kwargs):
         # Remove duplicates from phone and email lists
-        phones = [phone.strip() for phone in [self.main_phone_owner, self.alt_phone_owner, self.alt_mobile_owner, self.home_phone_owner, self.cell_owner] if phone is not None and phone.strip()]
-        emails = [email.strip() for email in [self.alt_email_2_owner, self.alt_email_1_owner, self.cc_email_owner, self.main_email_owner] if email is not None and email.strip()]
+        phones = [
+            phone.strip() for phone in [
+                self.main_phone_owner, 
+                self.alt_phone_owner,
+                self.alt_mobile_owner,
+                self.home_phone_owner,
+                self.cell_owner
+            ] if phone is not None and phone.strip()
+        ]
+        emails = [
+            email.strip() for email in [
+                self.alt_email_2_owner,
+                self.alt_email_1_owner, 
+                self.cc_email_owner,
+                self.main_email_owner
+            ] if email is not None and email.strip()
+        ]
 
         # Remove duplicates by converting to a set and back to a list
         phones = list(set(phones))
@@ -392,7 +433,8 @@ class Owner(models.Model):
 
         # Concatenate the four fields into the 'employee' field
         self.owner = f"{self.name_prefix_owner} {self.first_name_owner} {self.middle_name_owner} {self.last_name_owner}"
-        self.home_address_owner = f"{self.street_number_owner} {self.street_name_owner} {self.city_owner}, {self.state_owner} {self.zip_owner}"
+        self.home_address_owner = f"{self.street_number_owner} {self.street_name_owner} {self.city_owner}, "\
+            + f"{self.state_owner} {self.zip_owner}"
         super(Owner, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -505,7 +547,7 @@ class Client(models.Model):
     users = models.ManyToManyField(User)
     name = models.CharField(max_length=100)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE) # good idea if theres multiple owners
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     virtual = models.ForeignKey(Virtual, on_delete=models.CASCADE, related_name="virtual_package")
     list_of_phone = models.CharField(max_length=1000, blank=True, null=True)
@@ -513,8 +555,20 @@ class Client(models.Model):
 
     def save(self, *args, **kwargs):
 
-        phones = [phone.strip() for phone in '\n'.join([self.company.list_of_phone, self.employee.list_of_phone, self.owner.list_of_phone]).split('\n') if phone.strip()]
-        emails = [email.strip() for email in '\n'.join([self.employee.list_of_email, self.owner.list_of_email, self.company.list_of_email]).split('\n') if email.strip()]
+        phones = [
+            phone.strip() for phone in '\n'.join([
+                self.company.list_of_phone,
+                self.employee.list_of_phone,
+                self.owner.list_of_phone
+            ]).split('\n') if phone.strip()
+        ]
+        emails = [
+            email.strip() for email in '\n'.join([
+                self.employee.list_of_email, 
+                self.owner.list_of_email, 
+                self.company.list_of_email
+            ]).split('\n') if email.strip()
+        ]
 
         # Remove duplicates by converting to a set and back to a list
         phones = list(set(phones))
@@ -529,14 +583,18 @@ class Client(models.Model):
     def __str__(self):
         return f"name: {self.name} employee: {self.employee} owner: {self.owner} company: {self.company}"
 
+
 class Building(models.Model):
-    BUILDINGS = [('West Boca Executive Suites', 'West Boca Executive Suite'),
-                 ('7777 Glade Road', '777 Glade Road')]
+    BUILDINGS = [
+        ('West Boca Executive Suites', 'West Boca Executive Suites'),
+        ('7777 Glade Road', '7777 Glade Road'),
+    ]
     name = models.CharField(max_length=500)
     address = models.CharField(max_length=500)
 
     def __str__(self):
         return f"{self.name} - {self.address}"
+
 
 class ConferenceRoom(models.Model):
     CONFERENCE_ROOMS = [
@@ -544,48 +602,50 @@ class ConferenceRoom(models.Model):
         ('North Conference Room', 'North Conference Room'),
         ('Put Your Conference Room Name Here', 'Put Your Conference Room Name Here')
     ]
+    name = models.CharField(max_length=50)
     building = models.ManyToManyField(Building)
-    room = models.CharField(max_length=50)
     max_capacity = models.PositiveIntegerField(default=12)
     seating_capacity = models.PositiveIntegerField(default=10)
+    
     # Other room-related field
     def __str__(self):
-        return f"{self.room} with max capacity of {self.max_capacity} and seating capacity of {self.seating_capacity}"
+        return f"{self.name} with max capacity of {self.max_capacity} and seating capacity of {self.seating_capacity}"
 
 class Booking(models.Model):
-    name = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE)
-    start_time = models.DateTimeField()
-    duration = models.IntegerField(default=1)
-    end_time = models.DateTimeField(null=True, blank=True)
-    day = models.IntegerField(null=True, blank=True)
-    month= models.IntegerField(null=True, blank=True)
-    year = models.IntegerField(null=True, blank=True)
-    confirmation = models.CharField(max_length=500)
+    start_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField(null=True, blank=True)
+    duration_hours = models.PositiveIntegerField(default=1)
+    confirmation = models.CharField(max_length=500, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Calculate the total_price based on price and quantity        
-        if not self.end_time:
-            self.end_time = self.start_time + timedelta(hours=self.duration)
-        self.day = self.start_time.day
-        self.month = self.start_time.month
-        self.year = self.start_time.year
-
+        if not self.end_datetime:
+            self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
+        else:
+            difference = self.end_datetime - self.start_datetime
+            hours_from_days = difference.days * 24
+            hours_from_seconds = difference.seconds//3600
+            self.duration_hours = hours_from_days + hours_from_seconds
+            
         # Generate a "mashup" confirmation number
-        name_slug = slugify(self.name.name)
-        room_slug = slugify(self.room.room)
-        start_time_slug = self.start_time.strftime('%Y%m%d%H%M')
-        self.confirmation = f"{name_slug}-{room_slug}-{start_time_slug}"
-
+        # name_slug = slugify(self.client.name)
+        # room_slug = slugify(self.room.room)
+        # start_time_slug = self.start_time.strftime('%Y%m%d%H%M')
+        # self.confirmation = f"{name_slug}-{room_slug}-{start_time_slug}"
+        datetime_format = "%Y%m%d%H"
+        formatted_datetimes = self.start_datetime.strftime(datetime_format)+self.end_datetime.strftime(datetime_format)
+        self.confirmation = f"{self.room.pk:05d}{formatted_datetimes}"
+        
         super(Booking, self).save(*args, **kwargs)
 
     def clean(self):
         # Ensure that start_time only contains the hour with zero minutes and zero seconds
-        if self.start_time.minute != 0 or self.start_time.second != 0:
+        if self.start_datetime.minute != 0 or self.start_datetime.second != 0:
             raise ValidationError('Start time should only have the hour with zero minutes and zero seconds.')
 
     def __str__(self):
-        return f"{self.name} has scheduled the {self.room} in between {self.start_time} and {self.end_time}"
+        return f"{self.client.name} has scheduled the {self.room} in between {self.start_datetime} and {self.end_datetime}"
     
     
 class HangingLicense(models.Model):

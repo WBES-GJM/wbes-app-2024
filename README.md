@@ -156,6 +156,6 @@ class EcommerceOfficeView(LoginRequiredMixin, TemplateView):
 apps_office_view = EcommerceOfficeView.as_view("apps/apps-offices.html")
 ```
 
-# Footnotes
+## Footnotes
 
 Since the front-end is a preset code, a diligent reverse engineering is really needed to determine where changes are needed to be made. It could be in the JavaScript files, or it could be in an HTML file, and so on.

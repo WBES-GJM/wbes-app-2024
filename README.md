@@ -64,7 +64,7 @@ The process has three parts:
 2. URL in `urls.py`
 3. Process in `views.py` 
 
-## ***Consider the link or url of the action. ***
+## ***Consider the link or url of the action.***
 
 For example, accessing a page requires you to change the url in the `/templates/partials/left-sidebar.html`, or maybe the `/templates/partials/header.html`.
 

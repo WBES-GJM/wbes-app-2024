@@ -128,7 +128,7 @@ apps_users_profile_view = UserView.get_current_user(template_name="apps/users/ap
 
 class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
     
-    def post(self, request, room_id=None):
+    def post(self, request, room_id):
         # Parameters
         client_id = request.POST.get('new_booking_client_id')
         start_date = request.POST.get('newbooking_start_date_input')
@@ -139,114 +139,22 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
         use_end_datetime = request.POST.get('newbooking_check_use_end')
         
         
+        context = {}
         
-        # booking case where user is submitting time and info to book a conference room
-        if request.POST.get("start_time"):
-            # retrieve and assign variables from form inputs
-            client_name = request.POST.get("client_name")
-            conference_room = request.POST.get("conference_room")
-            start_time_str = request.POST.get("start_time")
-            start_time:datetime = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M')
-            day = start_time.day
-            month = start_time.month
-            year = start_time.year
-            duration = int(request.POST.get("duration"))
-            
-            print('conference_room should be here:', conference_room)
-            print('client name should be here', client_name)
-            
-            # Calculate the day of the week (0 = Monday, 1 = Tuesday, ...)
-            date = datetime(year, month, day)
-            day_of_week = date.weekday()
-
-            # Convert the day of the week to the name
-            day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            day_name = day_names[day_of_week]
-
-            try:
-                # Try to find the client and room by name
-                selected_client = Client.objects.get(name=client_name)
-                name = selected_client.name
-                selected_room = ConferenceRoom.objects.get(room=conference_room)
-                print('selected_room=', selected_room)
-
-            except (Client.DoesNotExist, ConferenceRoom.DoesNotExist):
-                print('either no client object or no conferenceroom object exists maybe')
-                return HttpResponseRedirect(reverse('calendar'))
-            
-            print('for sure went here')
-            clients = Client.objects.all()
-            
-            this_client = Client.objects.get(name=name)
-            phones = this_client.list_of_phone.split('\n')
-            emails = this_client.list_of_email.split('\n')
-
-            # Convert start_time_str to a datetime object
-            start_time = timezone.make_aware(datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M'))
-            dt = start_time.replace(minute=0, second=0)
-
-            # Calculate the end time by adding the duration as a timedelta
-            end_time = dt + timedelta(hours=duration)
-            bookings = Booking.objects.filter(day=day, month=month, year=year).order_by('start_time')
-
-            # Case when booking during a booked timeframe
-            for booking in bookings:
-                if start_time >= booking.start_time and start_time < booking.end_time:
-                    bookings = Booking.objects.filter(day=day, month=month, year=year).order_by('start_time')
-                    clients = Client.objects.all()
-                    context = {
-                        'day_name': day_name,
-                        'day': day,
-                        'month': month,
-                        'year': year,
-                        'bookings': bookings,
-                        'clients': clients,
-                        'error_message': 'This time slot is already booked.',
-                        'phones': phones,
-                        'emails': emails,
-                        'conference_room': conference_room
-                    }
-                    return render(request, 'commerce/calendar.html', context)
-                
-            # Case when booking is during open timeframe
-            booking = Booking(name=this_client, room=selected_room, start_time=dt, duration=duration, end_time=end_time)
-
-            booking.save()
-            bookings = Booking.objects.filter(day=day, month=month, year=year).order_by('start_time')
-            clients = Client.objects.all()
-            context = {
-                'day_name': day_name,
-                'day': day,
-                'month': month,
-                'year': year,
-                'bookings': bookings,
-                'clients': clients,
-                'phones': phones,
-                'emails': emails,
-                'conference_room': selected_room
-            }
-            
-            return render(request, 'commerce/calendar.html', context)
         
+        
+        return self.get(request, room_id, context)
+    
 
-
-    def get(self, request, room_id=None):
+    def get(self, request, room_id=None, context={}):
         
         # Fetch all buildings
         buildings = Building.objects.all()
         
         # Set context
         context = {
-            # 'day_name': day_name,
-            # 'day': day,
-            # 'month': month,
-            # 'year': year,
             'buildings': buildings,
-            # 'clients': clients,
-            # 'phones': phones,
-            # 'emails': emails,
-            # 'conference_room_options': conference_room_options,
-        }
+        }.update(context)
         
         # Return guard if theres no room id
         if room_id is None:

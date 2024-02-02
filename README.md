@@ -67,8 +67,6 @@ The process has three parts:
 ## ***Consider the link or url of the action.***
 
 For example, accessing a page requires you to change the url in the `/templates/partials/left-sidebar.html`, or maybe the `/templates/partials/header.html`.
-
-html
 ```
 <li>
     <a href="{% url 'apps:calendar' %}">
@@ -77,7 +75,7 @@ html
     </a>
 </li>
 ```
-urls.py
+And in the urls.py, it would look like,
 ```
 ...
 path("calendar/", view=apps_calendar_calendar_view, name="calendar"),
@@ -109,26 +107,17 @@ $.ajax({
     url: `get_rooms`,
     data: {building_id: this.value},
     success: function (response) {
-        
-        $('#select-conference-room option').remove();
-        disableSubmitRoom(false);
-
-        if (response.rooms) {
-            for (const room of JSON.parse(response.rooms)) {
-                $('#select-conference-room').append(
-                    $("<option>").text(room.name).attr('value', room.id)
-                );
-            }
-        }
+        // process response ...
     },
 });
 ```
-The urls.py would be the following. This is because we are already in `domain.com/calendar` when we enter the Calendar page, so just call `/get_rooms` in Ajax.
+The urls.py would then be, 
 ```
 ...
 path("calendar/get_rooms/", view=apps_calendar_get_rooms, name="calendar.get.rooms"),
 ...
 ```
+This is because we are already in `domain.com/calendar` when we enter the Calendar page, so just call `/get_rooms` in ajax. 
 
 ## ***Process in views.py with a structure in mind***
 
@@ -150,12 +139,16 @@ class EcommerceOfficeView(LoginRequiredMixin, TemplateView):
         # ... process here ...
         return render(request, self.template_name, context)
 
-# for example, the template has a path of "/templates/apps/apps-offices.html"
-# supply the template name, this is called by self.template_name inside the class
-# call "apps_office_view" in the urls.py as the function for the url
+# lets say the template has a path of "/templates/apps/apps-offices.html"
 apps_office_view = EcommerceOfficeView.as_view("apps/apps-offices.html")
+```
+Call this then in the urls.py as the function for the url
+```
+...
+path("calendar/get_rooms/", view=apps_calendar_get_rooms, name="calendar.get.rooms"),
+...
 ```
 
 ## Footnotes
 
-Since the front-end is a preset code, a diligent reverse engineering is really needed to determine where changes are needed to be made. It could be in the JavaScript files, or it could be in an HTML file, and so on.
+Since the front-end is a preset code, a diligent reverse engineering is greatly needed to determine where changes are needed to be made. It could be in the JavaScript files, or it could be in an HTML file, and so on.

@@ -48,7 +48,7 @@ To install the **python** dependencies needed, simply do the following.
 In case you want to reset the database
 
 - Rename the current one to have a backup.
-- In the terminal, enter the command `py manage.py migrate`.
+- In the terminal, enter the command `py manage.py migrate`. This will create a new `db.sqlite3`.
 - Then create a superuser with the command `py manage.py createsuperuser` to be able to login.
 
 # Footnotes

@@ -42,17 +42,19 @@
                         <div class="col-12">
 
                             <div class="row">
+
+                                <!-- LEFT SIDE FORM -->
                                 <div class="col-xl-3 col-lg-4">
                                     <div class="card">
                                         <div class="card-body">
 
                                             <div class="d-grid">
                                                 {% if no_room_selected or room_nonexistent %}
-                                                <button class="btn font-16 btn-primary" id="btn-new-event" disabled>
+                                                <button class="btn font-16 btn-primary" id="btn-new-booking" disabled>
                                                 {% else %}
-                                                <button class="btn font-16 btn-primary" id="btn-new-event">
+                                                <button class="btn font-16 btn-primary" id="btn-new-booking">
                                                 {% endif %}
-                                                <!-- <button class="btn font-16 btn-primary" id="btn-new-event"> -->
+                                                <!-- <button class="btn font-16 btn-primary" id="btn-new-booking"> -->
                                                     <i class="mdi mdi-plus-circle-outline"></i> 
                                                     New Booking
                                                 </button>
@@ -142,8 +144,10 @@
 
                                         </div>
                                     </div>
-                                </div> <!-- end col-->
+                                </div> 
+                                <!-- end col-->
 
+                                <!-- ACTUAL CALENDAR DIV -->
                                 <div class="col-xl-9 col-lg-8">
                                     <div class="card">
                                         <div class="card-body">
@@ -162,7 +166,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                </div> <!-- end col -->
+                                </div> 
+                                <!-- end col -->
 
                             </div>
 
@@ -175,13 +180,18 @@
                                     <div class="modal-content">
                                         <div class="modal-header py-3 px-4 border-bottom-0">
                                             <h5 class="modal-title" id="modal-title">New Booking</h5>
-
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-hidden="true"></button>
-
                                         </div>
                                         <div class="modal-body p-4">
-                                            <form class="needs-validation" name="newbooking_form" id="form-event" novalidate>
+                                            <form class="needs-validation" name="newbooking_form" 
+                                                id="booking-form" method="POST">
+                                                {% csrf_token %}
+                                                <!-- pseudo form method because django view doesnt read 
+                                                    put and delete fore some reason -->
+                                                <input type="hidden" value="" id="booking-method" name="booking_method" />
+                                                <input type="hidden" value="" id="opened-booking-id" name="opened_booking_id" />
+                                                <div style="visibility:hidden; position:absolute; z-index:-1000;">{{form}}</div>
                                                 <div class="row">
                                                     <div class="col-12">
                                                         <div class="mb-3">
@@ -189,12 +199,13 @@
                                                             <input id="newbooking-client-input"
                                                                 class="form-control" placeholder="Insert Client Name"
                                                                 type="text" name="title"  required value="" autocomplete="off"/>
-                                                            <input id="newbooking-client-value" type="hidden" 
-                                                                name="newbooking_client_id">
-                                                            <div id="newbooking-client-dropdown-menu"
-                                                                class="dropdown-menu dropdown-menu-end" 
-                                                                style="margin: -15px 12px 0 12px; left: 0 !important;">
-                                                                <!-- <a class="dropdown-item" href="#">hello</a> -->
+                                                            <div id="newbooking-client-dropdown"
+                                                                class="dropdown-menu dropdown-menu-end"
+                                                                style="max-height: 350px !important; overflow: auto !important; 
+                                                                    margin: -15px 12px 0 12px; left: 0 !important; ">
+                                                                <div id="newbooking-client-dropdown-menu">
+                                                                    
+                                                                </div>
                                                             </div>
                                                             <div class="invalid-feedback">
                                                                 Please provide a valid event name
@@ -204,9 +215,10 @@
                                                     <div class="col-12" id="newbooking-start-datetime">
                                                         <div class="mb-3" >
                                                             <label class="form-label">Start Date</label>
-                                                            <input type="date" id="newbooking-start-date-input" 
+                                                            <input type="date" id="newbooking-start-date-input" required 
                                                                 name="newbooking_start_date_input" class="form-control mb-1">
                                                             <select class="form-control form-select" 
+                                                                id="newbooking-start-time-input" 
                                                                 name="newbooking_start_time_input">
                                                                 <option value="8" selected>8:00 AM</option>
                                                                 <option value="9">9:00 AM</option>
@@ -229,6 +241,15 @@
                                                             </div> -->
                                                         </div>
                                                     </div>
+                                                    <div class="col-12" id="newbooking-duration-hours">
+                                                        <div class="mb-3">
+                                                            <label for="newbooking-duration-hours-input">Duration (hours)</label>
+                                                            <input type="number" class="form-control" 
+                                                                id="newbooking-duration-hours-input" 
+                                                                name="newbooking_duration_hours_input"
+                                                                min="1" value="1" placeholder="Insert Number of Hours" required>
+                                                        </div>
+                                                    </div>
                                                     <div class="col-12" id="newbooking-end-datetime" style="display: none;">
                                                         <div class="mb-3" >
                                                             <label class="form-label">End Date</label>
@@ -237,8 +258,8 @@
                                                             <select class="form-control form-select" 
                                                                 name="newbooking_end_time_input"
                                                                 id="newbooking-end-time-input">
-                                                                <option value="8" selected>8:00 AM</option>
-                                                                <option value="9">9:00 AM</option>
+                                                                <option value="8">8:00 AM</option>
+                                                                <option value="9" selected>9:00 AM</option>
                                                                 <option value="10">10:00 AM</option>
                                                                 <option value="11">11:00 AM</option>
                                                                 <option value="12">12:00 PM</option>
@@ -255,17 +276,8 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-12" id="newbooking-duration-hours">
-                                                        <div class="mb-3">
-                                                            <label for="newbooking-duration-hours-input">Duration (hours)</label>
-                                                            <input type="number" class="form-control" 
-                                                                id="newbooking-duration-hours-input" 
-                                                                name="newbooking_duration_hours_input"
-                                                                min="1" value="1" placeholder="Insert Number of Hours" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12" id="">
-                                                        <div class="mb-1 mt-1">
+                                                    <div class="col-12" id="newbooking-check-use-end-container">
+                                                        <div class="mt-1">
                                                             <input type="checkbox" class="form-check-input" 
                                                                 id="newbooking-check-use-end" name="newbooking_check_use_end">
                                                             <label for="newbooking-check-use-end">Use End Date instead</label>
@@ -275,13 +287,14 @@
                                                 <div class="row mt-2">
                                                     <div class="col-6">
                                                         <button type="button" class="btn btn-danger"
-                                                            id="btn-delete-event">Delete</button>
+                                                            id="btn-cancel-booking">Cancel Booking</button>
                                                     </div>
                                                     <div class="col-6 text-end">
                                                         <button type="button" class="btn btn-light me-1"
                                                             data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-success"
-                                                            id="btn-save-event">Save</button>
+                                                        <!-- The save button is triggered to save the form in calendar.init.js -->
+                                                        <button type="button" form="booking-form" class="btn btn-success"
+                                                            id="btn-save-event">Save</button> 
                                                     </div>
                                                 </div>
                                             </form>
@@ -291,6 +304,35 @@
                             </div>
                             <!-- end modal-->
 
+                            <!-- Confirmation MODAL -->
+                            <div class="modal fade" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header py-3 px-4 border-bottom-0">
+                                            <h5 class="modal-title" id="confirmation-modal-title"></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-hidden="true"></button>
+                                        </div>
+                                        <div class="modal-body p-4">
+                                            <div class="row">
+                                                <p>
+                                                    Are you sure you want to cancel this booking?
+                                                </p>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-6">
+                                                    <!-- <button type="button" class="btn btn-danger"
+                                                        id="btn-cancel-booking">Confirm Cancellation</button> -->
+                                                </div>
+                                                <div class="col-6 text-end">
+                                                    <button type="button" class="btn btn-light me-1"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -313,97 +355,254 @@
 
 <!-- Calendar init -->
 <script>
-    // For calendar.init
+
+    // For calendar.init.js
     var BOOKINGS = '{{ bookings | safe }}';
 
-    // For selection of building and rooms
-    $('#select-building').on('change', function(e) {
-        $.ajax({
-            url: `get_rooms`,
-            data: {building_id: this.value},
-            success: function (response) {
-                
-                $('#select-conference-room option').remove();
-                disableSubmitRoom(false);
+    // ------------------------------------------
+    //    For selection of building and rooms
+    // ------------------------------------------
 
-                if (response.rooms) {
-                    for (const room of JSON.parse(response.rooms)) {
-                        $('#select-conference-room').append(
-                            $("<option>").text(room.name).attr('value', room.id)
-                        );
+    function initRoomAndBuildingSelection () {
+
+        $('#select-building').on('change', function(e) {
+            $.ajax({
+                url: `get_rooms`,
+                data: {building_id: this.value},
+                success: function (response) {
+                    
+                    $('#select-conference-room option').remove();
+                    disableSubmitRoom(false);
+
+                    if (response.rooms) {
+                        for (const room of JSON.parse(response.rooms)) {
+                            $('#select-conference-room').append(
+                                $("<option>").text(room.name).attr('value', room.id)
+                            );
+                        }
                     }
-                }
-            },
+                },
+            });
         });
-    });
+        
+        $('#select-conference-room').on('change', function(e) {
+            disableSubmitRoom(this.value === '{{ selected_room.room_id }}');
+        });
+
+    }
+
+
+    // ------------------------------------------
+    //          For selection of client
+    // ------------------------------------------
+    function initClientSelection() {
+
+        $('#newbooking-client-input').on('focusout', function () {
+            $('#newbooking-client-dropdown').removeClass('show');
+        });
     
-    $('#select-conference-room').on('change', function(e) {
-        disableSubmitRoom(this.value === '{{ selected_room.room_id }}');
-    });
-
-    $('#newbooking-client-input').on('focusout', function () {
-        $('#newbooking-client-dropdown-menu').removeClass('show');
-    });
-
-    $('#newbooking-client-input').on('focusin', function () {
-        searchClient($('#newbooking-client-input').val());
-    });
-
-    $('#newbooking-client-input').on('input', function () {
-        searchClient(this.value);
-    })
-
-    $('#newbooking-check-use-end').on('change', function () {
-        if (this.checked) {
-            $('#newbooking-end-datetime').show();
-            $('#newbooking-duration-hours').hide();
-            $('#newbooking-duration-hours-input').attr('required', false);
-            $('#newbooking-end-date-input').attr('required', true);
-            $('#newbooking-end-time-input').attr('required', true);
-        } else {
-            $('#newbooking-duration-hours').show();
-            $('#newbooking-end-datetime').hide();
-            $('#newbooking-duration-hours-input').attr('required', true);
-            $('#newbooking-end-date-input').attr('required', false);
-            $('#newbooking-end-time-input').attr('required', false);
-        }
-    })
+        $('#newbooking-client-input').on('focusin', function () {
+            searchClient($('#newbooking-client-input').val());
+        });
     
+        $('#newbooking-client-input').on('input', function () {
+            searchClient(this.value);
+        });
+    
+        $('#newbooking-check-use-end').on('change', function () {
+            if (this.checked) {
+                $('#newbooking-end-datetime').show();
+                $('#newbooking-duration-hours').hide();
+                $('#newbooking-duration-hours-input').attr('required', false);
+                $('#newbooking-end-date-input').attr('required', true);
+                $('#newbooking-end-time-input').attr('required', true);
+            } else {
+                $('#newbooking-duration-hours').show();
+                $('#newbooking-end-datetime').hide();
+                $('#newbooking-duration-hours-input').attr('required', true);
+                $('#newbooking-end-date-input').attr('required', false);
+                $('#newbooking-end-time-input').attr('required', false);
+            }
+        });
+        
+    }
+
     function searchClient(value) {
+        $('#newbooking-client-dropdown-menu .dropdown-item').remove();
+
         if (value.length < 3) {
             $('#newbooking-client-value').val('');
-            $('#newbooking-client-dropdown-menu .dropdown-item').remove();
-            $('#newbooking-client-dropdown-menu').removeClass('show');
+            $('#newbooking-client-dropdown').removeClass('show');
             return;
         };
         
-        $.ajax({
-            url: `get_clients`,
-            data: {search_query: value},
-            success: function (response) {
-                $('#newbooking-client-dropdown-menu .dropdown-item').remove();
-                if (response.clients) {
-                    for (const client of JSON.parse(response.clients)) {
+        // Check if there are matching names
+        let matched = false;
+        for (const client of $('#id_client option')) {
+            const text = $(client).text();
+            if (text.toLowerCase().includes(value.toLowerCase())) {
+                matched = true;
+                const id = $(client).val()
+                const clientDropdownItem = $("<button>").text(text)
+                    .addClass('dropdown-item')
+                    .on('mousedown', function () {
+                        $('#newbooking-client-input').val(text);
+                        
+                        // $('id_client').val(id) is supposed to work
+                        // but it doesnt... work around is the below code
+                        $(`#id_client option:selected`).removeAttr('selected');
+                        $(`#id_client option[value="${id}"]`).attr('selected', 'selected');
+                    });
+                $('#newbooking-client-dropdown-menu').append(clientDropdownItem);
+            }
+        }
 
-                        const clientElement = $("<a>").text(client.name)
-                            .attr('href', '#')
-                            .addClass('dropdown-item')
+        // No matching names        
+        if (!matched) {
+            $('#newbooking-client-dropdown-menu').append(
+                $("<a>").text('No Available Client Found')
+                    .addClass('dropdown-item no-client-found')
+            );
+        }
 
-                        clientElement.on('click', 
-                            () => $('#newbooking-client-value').val(client.id));
+        $('#newbooking-client-dropdown').addClass('show');
+    }
 
-                        $('#newbooking-client-dropdown-menu').append(clientElement);
-                    }
-                } else {
-                    $('#newbooking-client-dropdown-menu').append(
-                        $("<a>").text('No Available Client Found')
-                            .addClass('dropdown-item')
-                    );
-                }
-                $('#newbooking-client-dropdown-menu').addClass('show');
-            },
+
+    // ------------------------------------------
+    //          For date and time inputs
+    // ------------------------------------------
+
+    function initDateTimeInputs() {
+        $('#newbooking-start-date-input').on('change', function () {
+            $('#newbooking-end-date-input').attr('min', this.value);
+            $('#newbooking-end-date-input').val(this.value);
+            setTimeOptions();
+        });
+    
+        $('#newbooking-end-date-input').on('change', function () {
+            setTimeOptions();
+        })
+    
+        $('#newbooking-start-time-input').on('change', function () {
+            setTimeOptions(true);
         });
     }
+
+    function setTimeOptions(startTimeOnchangeBool) {
+        const startTime = parseInt($('#newbooking-start-time-input').val());
+
+        if (startTimeOnchangeBool) {
+            $('#newbooking-end-time-input').val(`${startTime+1}`);
+        }
+
+        if ($('#newbooking-start-date-input').val() === $('#newbooking-end-date-input').val()) {
+
+            $('#newbooking-end-time-input option').show();
+            $('#newbooking-end-time-input option').filter(function () { 
+                return parseInt($(this).val()) <= startTime
+            }).hide();
+        } else {
+            $('#newbooking-end-time-input option').show();
+        }
+    }
+
+    function setDateInputs(start, end) {
+        $('#newbooking-start-date-input').val(start.toLocaleDateString('en-ca'));
+        $('#newbooking-end-date-input').val(end.toLocaleDateString('en-ca'));
+        $('#newbooking-start-time-input option:selected').removeAttr('selected');
+        $(`#newbooking-start-time-input option[value="${start.getHours()}"]`).attr('selected', 'selected');
+        $('#newbooking-end-time-input option:selected').removeAttr('selected');
+        $(`#newbooking-end-time-input option[value="${end.getHours()}"]`).attr('selected', 'selected');
+    }
+
+    function openBookingModal(selectedEvent) {
+        // Change form method to put, meaning edit
+        $('#booking-method').val('PUT');
+
+        // Client
+        $('#newbooking-client-input').val(selectedEvent.title); 
+
+        // Duration
+        $('#newbooking-check-use-end-container').hide();
+        $('#newbooking-duration-hours').hide();
+        $('#newbooking-end-datetime').show();
+        
+        // Start and End datetime
+        var tomorrowsDate = new Date();
+        tomorrowsDate.setDate(tomorrowsDate.getDate() + 1);
+        dateStr = tomorrowsDate.toLocaleDateString('en-ca');
+        $('#newbooking-start-date-input').attr('min', dateStr);
+        $('#newbooking-end-date-input').attr('min', dateStr);
+        setDateInputs(selectedEvent.start, selectedEvent.end);
+        setTimeOptions();
+
+        // Set client id and booking id
+        $.ajax({
+            url: 'get_client',
+            data: { 'booking_id': selectedEvent.id },
+            success: function (response) {
+                $('#id_client').val(response.client.id);
+            },
+        });
+        $('#opened-booking-id').val(selectedEvent.id);
+    }
+
+    function openNewBookingModal(clickedDate) {
+        // Change form method to post
+        $('#booking-method').val('POST');
+
+        // Duration
+        $('#newbooking-check-use-end-container').show();
+        $('#newbooking-duration-hours').show();
+        $('#newbooking-end-datetime').hide();
+
+        // Start and End datetime
+        var dateStr;
+        if (clickedDate) {
+            dateStr = clickedDate.toLocaleDateString('en-ca')
+        } else {
+            var tomorrowsDate = new Date();
+            tomorrowsDate.setDate(tomorrowsDate.getDate() + 1);
+            dateStr = tomorrowsDate.toLocaleDateString('en-ca');
+        }
+        $('#newbooking-start-date-input').attr('min', dateStr);
+        $('#newbooking-end-date-input').attr('min', dateStr);
+        $('#newbooking-start-date-input').val(dateStr);
+        $('#newbooking-end-date-input').val(dateStr);
+        $('#newbooking-start-time-input').val('8');
+        $('#newbooking-end-time-input').val('9');
+        $('#newbooking-end-time-input option').show();
+        $('#newbooking-end-time-input option[value="8"]').hide();
+
+        // Set form values
+        $('#opened-booking-id').val('');
+    }
+
+    function onDragBooking(selectedEvent) {
+        // Change form method to put, meaning edit
+        $('#booking-method').val('PUT');
+
+        // Set client id and booking id
+        $.ajax({
+            url: 'get_client',
+            data: { 'booking_id': selectedEvent.id },
+            success: function (response) {
+                $('#id_client').val(response.client.id);
+            },
+        });
+        $('#opened-booking-id').val(selectedEvent.id);
+
+        // Set new date values
+        setDateInputs(selectedEvent.start, selectedEvent.end);
+
+        // Submit form
+        $('#booking-form').submit();
+    }
+
+    // ------------------------------------------
+    //     For submissions and cancellations
+    // ------------------------------------------
 
     function disableSubmitRoom(value) {
         $('#btn-submit-room').attr('disabled', value);
@@ -416,6 +615,21 @@
         urlList.push(value);
         window.location = urlList.join('/');
     }
+
+    function cancelBooking() {
+        // Change form method to delete then submit
+        $('#booking-method').val('DELETE');
+        $('#booking-form').submit();
+    }
+
+    // ------------------------------------------
+    //                 ONREADY
+    // ------------------------------------------
+
+    initClientSelection();
+    initRoomAndBuildingSelection();
+    initDateTimeInputs();
+
 </script>
 <script src="{% static 'js/pages/calendar.init.js' %}"></script>
 {% endblock extra_js %}

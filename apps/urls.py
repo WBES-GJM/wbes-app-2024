@@ -14,8 +14,8 @@ from .views import (
     
     # calendar
     apps_calendar_calendar_view, 
-    apps_calendar_get_rooms, 
-    apps_calendar_get_clients,
+    apps_ajax_get_rooms, 
+    apps_ajax_get_client,
     
     apps_chat_chat_view,
     apps_email_inbox_view,
@@ -69,11 +69,13 @@ urlpatterns = [
     path("ecommerce/seller", view=apps_ecommerce_seller_view,name="ecommerce.seller"),
     path("ecommerce/seller_details", view=apps_ecommerce_seller_details_view,name="ecommerce.seller_details"),
     
-    # CALENDAR
+    # ------------------------ CALENDAR ------------------------
     path("calendar/", view=apps_calendar_calendar_view, name="calendar"),
     path("calendar/<int:room_id>", view=apps_calendar_calendar_view, name="calendar"),
-    path("calendar/get_rooms/", view=apps_calendar_get_rooms, name="calendar.get.rooms"),
-    path("calendar/get_clients/", view=apps_calendar_get_clients, name="calendar.get.clients"),
+    path("calendar/get_rooms/", view=apps_ajax_get_rooms, name="calendar.get.rooms"),
+    path("calendar/get_client/", view=apps_ajax_get_client, name="calendar.get.client"),
+    path("calendar/delete/<int:booking_id>", view=apps_ajax_get_client, name="calendar.get.client"),
+    # ----------------------------------------------------------
     
     # chat
     path("chat", view=apps_chat_chat_view, name="chat"),

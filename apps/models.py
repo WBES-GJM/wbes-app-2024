@@ -581,6 +581,9 @@ class Client(models.Model):
         super(Client, self).save(*args, **kwargs)
 
     def __str__(self):
+        return self.name
+    
+    def display_text(self) -> str:
         return f"name: {self.name} employee: {self.employee} owner: {self.owner} company: {self.company}"
 
 
@@ -614,11 +617,12 @@ class ConferenceRoom(models.Model):
 class Booking(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE)
-    start_datetime = models.DateTimeField()
+    start_datetime = models.DateTimeField(blank=True)
     end_datetime = models.DateTimeField(null=True, blank=True)
     duration_hours = models.PositiveIntegerField(default=1)
-    confirmation = models.CharField(max_length=500, null=True, blank=True)
+    confirmation = models.CharField(max_length=500, blank=True)
 
+    # Override
     def save(self, *args, **kwargs):
         if not self.end_datetime:
             self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
@@ -638,11 +642,6 @@ class Booking(models.Model):
         self.confirmation = f"{self.room.pk:05d}{formatted_datetimes}"
         
         super(Booking, self).save(*args, **kwargs)
-
-    def clean(self):
-        # Ensure that start_time only contains the hour with zero minutes and zero seconds
-        if self.start_datetime.minute != 0 or self.start_datetime.second != 0:
-            raise ValidationError('Start time should only have the hour with zero minutes and zero seconds.')
 
     def __str__(self):
         return f"{self.client.name} has scheduled the {self.room} in between {self.start_datetime} and {self.end_datetime}"

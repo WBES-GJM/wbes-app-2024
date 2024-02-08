@@ -1,9 +1,11 @@
 import calendar, json
+from typing import Any
 from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
 from datetime import datetime, timedelta
+from django.http.response import HttpResponse
 from django.utils import timezone
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,17 +16,22 @@ from .models import (
     Employee, Client, 
     ConferenceRoom, Booking, Building
 )
+from .forms import BookingForm
+from .helper import ModelInstanceGetter, JsonResponseHelper
 
 # ---------------------------------------------
 #             AJAX functions 
 # ---------------------------------------------
 
 class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
-    
     '''
     This purpose class-based view is only to return JsonResponse.
     All static methods from this class will be called by ajax functions from the JS files. 
     '''
+    
+    # -------------------------------------
+    #           Fetching Data
+    # -------------------------------------
     
     @staticmethod
     def get_rooms(request):
@@ -47,8 +54,55 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
         ]
         return JsonResponse({'rooms': json.dumps(rooms, cls=DjangoJSONEncoder)})
     
+    
     @staticmethod
-    def get_clients(request):
+    def get_client(request):
+        
+        # Inner methods
+        def _get_client_with_booking(booking_id:int):
+            booking:Booking = ModelInstanceGetter.get_instance(Booking, booking_id)
+            assert booking
+            
+            return booking.client
+            
+        # Parameters
+        booking_id = request.GET.get('booking_id')
+        # ... 
+        # ...
+        # probably more parameters in the future
+        
+        if booking_id:
+            client = _get_client_with_booking(int(booking_id))
+            client = JsonResponseHelper.serialize(client)
+        
+        # Return response
+        response = {
+            'client': client
+        } if client else {}
+        return JsonResponse(response)
+    
+    @staticmethod
+    def get_booking(request):
+        pass
+        # try:
+        #     if not booking_id:
+        #         booking_id = request.GET.get('booking_id')
+        #     if not booking_id:
+        #         raise ValueError('No booking_id provided')
+            
+        #     query = ModelInstanceGetter.get_instance(Booking, int(booking_id))
+        
+        # except ValueError:
+        #     pass
+        
+        # response = {
+        #     'clients': json.dumps(query, cls=DjangoJSONEncoder)
+        # } if query else {}
+        # return JsonResponse(response)
+    
+    ''' This method is currently not being used '''
+    @staticmethod
+    def search_clients(request):
         # Parameters
         search = request.GET.get('search_query')
         
@@ -56,17 +110,18 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
         clients_query = Client.objects.all()
         if search:
             clients_query = clients_query.filter(Q(name__icontains=search)) # filter by search here
-        clients = [
-            {'id': obj.pk, 'name': obj.name}
-            for obj in clients_query
-        ]
+        clients = [JsonResponseHelper.serialize(obj) for obj in clients_query]
         
         # Return response
         response = {
             'clients': json.dumps(clients, cls=DjangoJSONEncoder)
         } if clients_query else {}
         return JsonResponse(response)
+    
 
+
+apps_ajax_get_rooms = AjaxFunctionsView.get_rooms
+apps_ajax_get_client = AjaxFunctionsView.get_client
 
 # ---------------------------------------------
 #               Users views 
@@ -74,8 +129,13 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
 
 class UserView(LoginRequiredMixin, TemplateView):
     
+    template_name="apps/users/apps-users-profile.html"
+    
     @staticmethod
-    def get_employee_list(template_name):
+    def get_employee_list():
+        
+        template_name = "apps/users/apps-users-employees.html"
+        
         def get(request):
             
             form = None
@@ -87,7 +147,10 @@ class UserView(LoginRequiredMixin, TemplateView):
         return get
     
     @staticmethod
-    def get_current_user(template_name):
+    def get_current_user():
+        
+        template_name="apps/users/apps-users-profile.html"
+        
         def get(request):
             
             form = None
@@ -117,63 +180,59 @@ class UserView(LoginRequiredMixin, TemplateView):
         except (Employee.DoesNotExist, IndexError):
             return render(request, self.template_name, {}) # should raise 404
 
-apps_users_employees_view = UserView.get_employee_list(template_name="apps/users/apps-users-employees.html")
-apps_users_employee_view = UserView.as_view(template_name="apps/users/apps-users-profile.html")
-apps_users_profile_view = UserView.get_current_user(template_name="apps/users/apps-users-profile.html")
+apps_users_employees_view = UserView.get_employee_list()
+apps_users_employee_view = UserView.as_view()
+apps_users_profile_view = UserView.get_current_user()
 
 
 # ---------------------------------------------
 #               Calendar views 
 # ---------------------------------------------
 
-class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
+class EcommerceCalendarView(LoginRequiredMixin, TemplateView, View):
     
-    def post(self, request, room_id):
-        # Parameters
-        client_id = request.POST.get('new_booking_client_id')
-        start_date = request.POST.get('newbooking_start_date_input')
-        start_time = request.POST.get('newbooking_start_time_input')
-        end_date = request.POST.get('newbooking_end_date_input')
-        end_time = request.POST.get('newbooking_end_time_input')
-        duration_hours = request.POST.get('newbooking_duration_hours_input')
-        use_end_datetime = request.POST.get('newbooking_check_use_end')
-        
-        
-        context = {}
-        
-        
-        
-        return self.get(request, room_id, context)
+    template_name="apps/apps-calendar.html"
     
-
-    def get(self, request, room_id=None, context={}):
+    
+    def format_datetime(self, date: str, hour: int) -> datetime:
+        datetime_str = f'{date} {hour}:00:00'
+        return datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+    
+    
+    def get(self, request,  *args, **kwargs):
+        # Get parameters
+        room_id = kwargs.get('room_id', None)
+        context = kwargs.get('context', {})
         
         # Fetch all buildings
         buildings = Building.objects.all()
         
         # Set context
-        context = {
-            'buildings': buildings,
-        }.update(context)
+        context['buildings'] = buildings
         
         # Return guard if theres no room id
         if room_id is None:
             context['no_room_selected'] = True
             return render(request, self.template_name, context)
         
-        # Set values of rooms if existing
+        # See if room is existing
         try:
             room = ConferenceRoom.objects.get(id=room_id)
-            building_id = room.building.all()[0].id
-            rooms_query = ConferenceRoom.objects.filter(building__id=building_id)
-            context['rooms'] = rooms_query
-            context['selected_room'] = {
-                'building_id': building_id, 
-                'room_id': room_id
-            }
         except ConferenceRoom.DoesNotExist:
             context['room_nonexistent'] = True
             return render(request, self.template_name, context)
+        
+        # Set objects
+        building_id = room.building.all()[0].id
+        rooms_query = ConferenceRoom.objects.filter(building__id=building_id)
+        context['rooms'] = rooms_query
+        context['selected_room'] = {
+            'building_id': building_id, 
+            'room_id': room_id
+        }
+        
+        # Set form
+        context['form'] = BookingForm(current_user=request.user, initial={'room': room})
         
         # Fetch all the bookings on the specified room
         bookings_query = Booking.objects.filter(room__id=room_id)
@@ -181,21 +240,22 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
             {
                 'id': bk.pk,
                 'title': bk.client.name \
-                    if (request.user.id,) in \
-                    list(bk.client.users.all().values_list('id')) \
+                    if request.user.id in \
+                    list(bk.client.users.all().values_list('id', flat=True)) \
                     else '',
                 'start': [
                     bk.start_datetime.year,
                     bk.start_datetime.month-1,
                     bk.start_datetime.day,
-                    bk.start_datetime.hour, 0
+                    bk.start_datetime.hour,
                 ],
                 'end': [
                     bk.end_datetime.year,
                     bk.end_datetime.month-1,
                     bk.end_datetime.day,
-                    bk.end_datetime.hour, 0
+                    bk.end_datetime.hour,
                 ],
+                'duration': bk.duration_hours,
                 # 'allDay': False,
                 # 'url': '',
                 # 'className': 'bg-info',
@@ -213,7 +273,6 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
             className: 'bg-info'
         }
         '''
-    
         
         # Transform into JSON objects
         bookings = json.dumps(bookings_list, cls=DjangoJSONEncoder)
@@ -222,10 +281,85 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView):
         context['bookings'] = bookings
 
         return render(request, self.template_name, context)
+    
+    
+    def post(self, request, *args, **kwargs):
+        
+        # Check if edit or delete
+        what_to_do = str(request.POST.get('booking_method'))
+        if what_to_do.lower() == 'put':
+            return self._put(request, *args, **kwargs)
+        elif what_to_do.lower() == 'delete':
+            return self._delete(request, *args, **kwargs)
+            
+        # Parameters
+        start_date = request.POST.get('newbooking_start_date_input')
+        start_time = request.POST.get('newbooking_start_time_input')
+        end_date = request.POST.get('newbooking_end_date_input')
+        end_time = request.POST.get('newbooking_end_time_input')
+        duration_hours = int(request.POST.get('newbooking_duration_hours_input'))
+        use_end_datetime = request.POST.get('newbooking_check_use_end')
+        
+        # Set the values
+        start_datetime = self.format_datetime(start_date, start_time)
+        if use_end_datetime:
+            end_datetime = self.format_datetime(end_date, end_time)
+            duration_hours = None
+        else:
+            end_datetime = None
 
-apps_calendar_calendar_view = EcommerceCalendarView.as_view(template_name="apps/apps-calendar.html")
-apps_calendar_get_rooms = AjaxFunctionsView.get_rooms
-apps_calendar_get_clients = AjaxFunctionsView.get_clients
+        # Create new entry with form and save it
+        booking_form = BookingForm(request.POST)
+        if booking_form.is_valid():
+            booking = booking_form.save(commit=False)
+            booking.start_datetime = start_datetime
+            booking.end_datetime = end_datetime
+            booking.duration_hours = duration_hours
+            booking.save()
+            return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+        
+        # Set context if there are any errors
+        if booking_form.errors:
+            kwargs['context']['error'] = booking_form.errors
+        
+        return self.get(request, *args, **kwargs)
+    
+    
+    def _put(self, request, *args, **kwargs):
+        # Parameters
+        booking_id = request.POST.get('opened_booking_id')
+        start_date = request.POST.get('newbooking_start_date_input')
+        start_time = request.POST.get('newbooking_start_time_input')
+        end_date = request.POST.get('newbooking_end_date_input')
+        end_time = request.POST.get('newbooking_end_time_input')
+        
+        # Set the values
+        start_datetime = self.format_datetime(start_date, start_time)
+        end_datetime = self.format_datetime(end_date, end_time)
+
+        # Save the values
+        booking = ModelInstanceGetter.get_instance(Booking, int(booking_id))
+        booking_form = BookingForm(instance=booking)
+        booking = booking_form.save(commit=False)
+        booking.start_datetime = start_datetime
+        booking.end_datetime = end_datetime
+        booking.save()
+        
+        return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+    
+    
+    def _delete(self, request, *args, **kwargs):
+        # Parameters
+        booking_id = request.POST.get('opened_booking_id')
+        
+        # Delete the instance
+        booking = ModelInstanceGetter.get_instance(Booking, int(booking_id))
+        booking.delete()
+        
+        return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+
+
+apps_calendar_calendar_view = EcommerceCalendarView.as_view()
 
 # ---------------- Sample view ----------------
 class AppsView(LoginRequiredMixin, TemplateView):

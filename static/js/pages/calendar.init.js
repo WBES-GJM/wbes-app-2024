@@ -15,52 +15,52 @@ File: Calendar init js
 
             var addEvent = $("#event-modal");
             var modalTitle = $("#modal-title");
-            var formEvent = $("#form-event");
+            var formEvent = $("#booking-form");
             var forms = $('.needs-validation');
             var selectedEvent = null;
             var newEventData = null;
-            var eventObject = null;
+            // var eventObject = null;
+
             /* initialize the calendar */
+            // var date = new Date();
+            // var d = date.getDate();
+            // var m = date.getMonth();
+            // var y = date.getFullYear();
+            // var externalEventContainerEl = document.getElementById('external-events');
 
-            var date = new Date();
-            var d = date.getDate();
-            var m = date.getMonth();
-            var y = date.getFullYear();
+            // init dragable - modified 2/7/2024
             var Draggable = FullCalendarInteraction.Draggable;
-            var externalEventContainerEl = document.getElementById('external-events');
-            // init dragable
-            new Draggable(externalEventContainerEl, {
-                itemSelector: '.external-event',
-                eventData: function (eventEl) {
-                    return {
-                        title: eventEl.innerText,
-                        className: $(eventEl).data('class')
-                    };
-                }
-            });
+            const initDraggable = (parentId, childClass) => {
+                new Draggable(document.getElementById(parentId), {
+                    itemSelector: childClass,
+                    eventData: function (eventEl) {
+                        console.log('here!!', eventEl)
+                        // return {
+                        //     // title: eventEl.innerText,
+                        //     // className: $(eventEl).data('class')
+                        // };
+                    }
+                });
+            }
 
-            // Bookings data
-            // [
-                // {
-                //     id: 999,
-                //     title: 'Repeating Event',
-                //     start: new Date(y, m, d - 3, 16, 0),
-                //     end: new Date(y, m, d - 2),
-                //     allDay: false,
-                //     url: 'http://google.com/',
-                //     className: 'bg-info'
-                // }
-            // ];
+            // initDraggable('calendar', '.fc-event');
+
+            /* Bookings data [
+                {
+                    id: 999,
+                    title: 'Repeating Event',
+                    start: new Date(y, m, d, 16, 0),
+                    end: new Date(y, m, d),
+                    allDay: false,
+                    url: 'http://google.com/',
+                    className: 'bg-info'
+                }
+            ]; */
             var fetchBookings = BOOKINGS ? JSON.parse(BOOKINGS) : [];
             var defaultEvents = [];
             var formatDate = (argsList) => {
-                return new Date(
-                    argsList[0],
-                    argsList[1],
-                    argsList[2],
-                    argsList[3],
-                    argsList[4],
-                )
+                // year, month, day, Hour, Minute
+                return new Date(argsList[0], argsList[1], argsList[2], argsList[3], 0)
             }
             for (const bk of fetchBookings) {
                 bk.start = formatDate(bk.start);
@@ -73,15 +73,16 @@ File: Calendar init js
             var calendarEl = document.getElementById('calendar');
 
             function addNewEvent(info) {
-                // for date and time
-                $('#newbooking-start-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
-                $('#newbooking-end-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
-
                 // preset codes
                 addEvent.modal('show');
                 formEvent.removeClass("was-validated");
                 formEvent[0].reset();
 
+                // not preset code
+                openNewBookingModal(info.date);
+                $("#btn-cancel-booking").hide();
+
+                // preset codes
                 $("#form-client-input").val();
                 $('#event-category').val();
                 modalTitle.text('Add Event');
@@ -102,20 +103,25 @@ File: Calendar init js
                     right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
                 },
                 eventClick: function (info) {
-                    // for date and time
-                    $('#newbooking-start-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
-                    $('#newbooking-end-date-input').attr('min', new Date().toLocaleDateString('en-ca'));
 
                     // preset codes
                     addEvent.modal('show');
                     formEvent[0].reset();
                     selectedEvent = info.event;
-                    $("#newbooking-client-input").val(selectedEvent.title); // except this
-                    $('#event-category').val(selectedEvent.classNames[0]);
+
+                    // not preset codes
+                    openBookingModal(selectedEvent);
+
+                    // preset codes
                     newEventData = null;
                     modalTitle.text('Edit Event');
                     newEventData = null;
-                    $("#btn-delete-event").show();
+                    $("#btn-cancel-booking").show();
+                },
+                // not preset code - eventDrop
+                eventDrop: function (info) {
+                    selectedEvent = info.event;
+                    onDragBooking(selectedEvent);
                 },
                 dateClick: function (info) {
                     addNewEvent(info);
@@ -125,18 +131,18 @@ File: Calendar init js
             calendar.render();
 
             /*Add new event*/
-            // Form to add new event
-
-            $(formEvent).on('submit', function (ev) {
-                ev.preventDefault();
-                var inputs = $('#form-event :input');
-                var updatedTitle = $("#form-client-input").val();
+            // Form to add new event when save button is pressed, instead of when form is submitted
+            // $(formEvent).on('submit', function (ev) {
+            $('#btn-save-event').on('click', function () { 
+                // ev.preventDefault();
+                //  var inputs = $('#booking-form :input');
+                var updatedTitle = $("#newbooking-client-input").val();
                 var updatedCategory = $('#event-category').val();
 
                 // validation
                 if (forms[0].checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                    // event.preventDefault();
+                    // event.stopPropagation();
                     forms[0].classList.add('was-validated');
                 } else {
                     if (selectedEvent) {
@@ -152,23 +158,32 @@ File: Calendar init js
                         calendar.addEvent(newEvent);
                     }
                     addEvent.modal('hide');
+                    formEvent.submit();
                 }
             });
 
-            $("#btn-delete-event").on('click', function (e) {
+            $("#btn-cancel-booking").on('click', function (e) {
                 if (selectedEvent) {
                     selectedEvent.remove();
                     selectedEvent = null;
                     addEvent.modal('hide');
+
+                    // not preset code
+                    cancelBooking();
                 }
             });
 
-            $("#btn-new-event").on('click', function (e) {
+            $("#btn-new-booking").on('click', function (e) {
+                // not preset code
+                var tomorrowsDate = new Date();
+                tomorrowsDate.setDate(tomorrowsDate.getDate() + 1);
+
+                // preset code
                 addNewEvent({
-                    date: new Date(),
+                    date: tomorrowsDate, // not preset
                     allDay: true,
                 });
-                $("#btn-delete-event").hide();
+                // $("#btn-cancel-booking").hide();
             });
 
         },

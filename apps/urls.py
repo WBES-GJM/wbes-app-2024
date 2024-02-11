@@ -13,7 +13,7 @@ from .views import (
     apps_ecommerce_seller_details_view,
     
     # calendar
-    apps_calendar_calendar_view, 
+    apps_booking_calendar_view, 
     apps_ajax_get_rooms, 
     apps_ajax_get_client,
     
@@ -28,15 +28,28 @@ from .views import (
     # apps_contacts_usergrid_view,
     # apps_contacts_userlist_view,
     # apps_contacts_profile_view,
-    apps_users_employees_view,
-    apps_users_employee_view,
+    apps_users_myprofile_view,
     apps_users_profile_view,
-    apps_horizontal_horizontal_view,
+    # apps_horizontal_horizontal_view,
 )
 
 app_name = "apps"
 urlpatterns = [
     # Ecommerce
+    
+    # ------------------------ BOOKING ------------------------
+    path("ecommerce/booking/", view=apps_booking_calendar_view, name="ecommerce.booking"),
+    path("ecommerce/booking/<int:room_id>", view=apps_booking_calendar_view, name="ecommerce.booking"),
+    path("ecommerce/booking/get_rooms/", view=apps_ajax_get_rooms, name="ecommerce.booking.get.rooms"),
+    path("ecommerce/booking/get_client/", view=apps_ajax_get_client, name="ecommerce.booking.get.client"),
+    # ---------------------------------------------------------
+    
+    #  ----------------------- PROFILES -----------------------
+    path("users/myprofile", view=apps_users_myprofile_view, name="users.myprofile"),
+    path("users/<str:profile>", view=apps_users_profile_view, name="users.list"),
+    path("users/<str:profile>/<int:id>", view=apps_users_profile_view, name="users.profile"),
+    # ---------------------------------------------------------
+    
     path(
         "ecommerce/add-product",
         view=apps_ecommerce_add_product_view,
@@ -69,12 +82,12 @@ urlpatterns = [
     path("ecommerce/seller", view=apps_ecommerce_seller_view,name="ecommerce.seller"),
     path("ecommerce/seller_details", view=apps_ecommerce_seller_details_view,name="ecommerce.seller_details"),
     
-    # ------------------------ CALENDAR ------------------------
-    path("calendar/", view=apps_calendar_calendar_view, name="calendar"),
-    path("calendar/<int:room_id>", view=apps_calendar_calendar_view, name="calendar"),
-    path("calendar/get_rooms/", view=apps_ajax_get_rooms, name="calendar.get.rooms"),
-    path("calendar/get_client/", view=apps_ajax_get_client, name="calendar.get.client"),
-    path("calendar/delete/<int:booking_id>", view=apps_ajax_get_client, name="calendar.get.client"),
+    # ------------------------ OLD CALENDAR ------------------------
+    # path("calendar/", view=apps_calendar_calendar_view, name="calendar"),
+    # path("calendar/<int:room_id>", view=apps_calendar_calendar_view, name="calendar"),
+    # path("calendar/get_rooms/", view=apps_ajax_get_rooms, name="calendar.get.rooms"),
+    # path("calendar/get_client/", view=apps_ajax_get_client, name="calendar.get.client"),
+    # path("calendar/delete/<int:booking_id>", view=apps_ajax_get_client, name="calendar.get.client"),
     # ----------------------------------------------------------
     
     # chat
@@ -86,11 +99,6 @@ urlpatterns = [
     path("tasks/create-task", view=apps_tasks_create_view, name="tasks.create"),
     path("tasks/kanban", view=apps_tasks_kanban_view, name="tasks.kanban"),
     path("tasks/list", view=apps_tasks_list_view, name="tasks.list"),
-    # Users
-    # path("users/user_grid", view=apps_contacts_usergrid_view, name="users.usergrid"),
-    path("users/employees", view=apps_users_employees_view, name="users.employees"),
-    path("users/employee/<int:id>", view=apps_users_employee_view, name="users.employee"),
-    path("users/profile", view=apps_users_profile_view,name="users.profile"),
     # Horizontal
     # path("horizontal", view=apps_horizontal_horizontal_view, name="horizontal"),
 ]

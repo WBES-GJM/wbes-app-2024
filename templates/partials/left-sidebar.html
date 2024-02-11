@@ -27,6 +27,32 @@
                                 <span data-key="t-ecommerce">Ecommerce</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'apps:ecommerce.booking'%}" key="t-booking">Booking</a></li>
+                                <!-- <li><a href="{% url 'apps:ecommerce.seller'%}" data-key="t-seller">Seller <span class="badge rounded-pill bg-danger-subtle text-danger float-end">New</span></a></li>
+                                <li><a href="{% url 'apps:ecommerce.seller_details'%}" data-key="t-sale-details">Sale details <span class="badge rounded-pill bg-danger-subtle text-danger float-end">New</span></a></li> -->
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="users"></i>
+                                <span data-key="t-contacts">Accounts</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'apps:users.myprofile'%}" data-key="t-profile">My Profile</a></li>
+                                <li><a href="{% url 'apps:users.list' 'client' %}" data-key="t-client-list">Clients</a></li>
+                                <li><a href="{% url 'apps:users.list' 'company' %}" data-key="t-company-list">Companies</a></li>
+                                <li><a href="{% url 'apps:users.list' 'owner' %}" data-key="t-owner-list">Owners</a></li>
+                                <li><a href="{% url 'apps:users.list' 'employee' %}" data-key="t-employee-list">Employees</a></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="shopping-cart"></i>
+                                <span data-key="t-ecommerce">Old Ecommerce</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
                                 <li><a href="{% url 'apps:ecommerce.products'%}" key="t-products">Products</a></li>
                                 <li><a href="{% url 'apps:ecommerce.product_detail'%}" data-key="t-product-detail">Product Detail</a></li>
                                 <li><a href="{% url 'apps:ecommerce.orders'%}" data-key="t-orders">Orders</a></li>
@@ -59,24 +85,10 @@
                         </li>
 
                         <li>
-                            <a href="{% url 'apps:calendar' %}">
+                            <a href="{ url 'apps:calendar' }">
                                 <i data-feather="calendar"></i>
                                 <span data-key="t-calendar">Calendar</span>
                             </a>
-                        </li>
-
-                        
-                        
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow">
-                                <i data-feather="users"></i>
-                                <span data-key="t-contacts">Users</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                <!-- <li><a href="{ url 'apps:contacts.usergrid' }" data-key="t-user-grid">Clients</a></li> -->
-                                <li><a href="{% url 'apps:users.employees'%}" data-key="t-user-list">Employees</a></li>
-                                <li><a href="{% url 'apps:users.profile'%}" data-key="t-profile">My Profile</a></li>
-                            </ul>
                         </li>
 
                         <li>

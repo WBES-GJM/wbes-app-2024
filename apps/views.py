@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.views.generic import TemplateView
 from .models import (
-    Employee, Client, 
+    Employee, Client, Company, Owner, 
     ConferenceRoom, Booking, Building
 )
 from .forms import BookingForm
@@ -123,75 +123,15 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
 apps_ajax_get_rooms = AjaxFunctionsView.get_rooms
 apps_ajax_get_client = AjaxFunctionsView.get_client
 
-# ---------------------------------------------
-#               Users views 
-# ---------------------------------------------
-
-class UserView(LoginRequiredMixin, TemplateView):
-    
-    template_name="apps/users/apps-users-profile.html"
-    
-    @staticmethod
-    def get_employee_list():
-        
-        template_name = "apps/users/apps-users-employees.html"
-        
-        def get(request):
-            
-            form = None
-            context = {
-                "employees": Employee.objects.all()
-            }
-            
-            return render(request, template_name, context)
-        return get
-    
-    @staticmethod
-    def get_current_user():
-        
-        template_name="apps/users/apps-users-profile.html"
-        
-        def get(request):
-            
-            form = None
-            try:
-                emp = Employee.objects.filter(user=request.user)[0]
-                context = {
-                    "user_details": emp,
-                    "options": {
-                        "disable_message": True
-                    }
-                }
-                return render(request, template_name, context)
-            except (Employee.DoesNotExist, IndexError):
-                return render(request, template_name, {}) # should raise employee profile not found
-            
-        return get
-    
-    def get(self, request, id):
-        try:
-            emp = Employee.objects.filter(id=id)[0]
-            context = {
-                "user_details": emp
-            }
-            if emp.user == request.user:
-                context['options'] = {"disable_message": True}
-            return render(request, self.template_name, context)
-        except (Employee.DoesNotExist, IndexError):
-            return render(request, self.template_name, {}) # should raise 404
-
-apps_users_employees_view = UserView.get_employee_list()
-apps_users_employee_view = UserView.as_view()
-apps_users_profile_view = UserView.get_current_user()
-
 
 # ---------------------------------------------
-#               Calendar views 
+#               Booking views 
 # ---------------------------------------------
 
-class EcommerceCalendarView(LoginRequiredMixin, TemplateView, View):
+class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
     
-    template_name="apps/apps-calendar.html"
+    reverse_url = "apps:ecommerce.booking"
+    template_name = "apps/ecommerce/ecommerce-booking.html"
     
     
     def format_datetime(self, date: str, hour: int) -> datetime:
@@ -316,7 +256,7 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView, View):
             booking.end_datetime = end_datetime
             booking.duration_hours = duration_hours
             booking.save()
-            return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+            return HttpResponseRedirect(reverse(self.reverse_url, kwargs=kwargs))
         
         # Set context if there are any errors
         if booking_form.errors:
@@ -345,7 +285,7 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView, View):
         booking.end_datetime = end_datetime
         booking.save()
         
-        return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+        return HttpResponseRedirect(reverse(self.reverse_url, kwargs=kwargs))
     
     
     def _delete(self, request, *args, **kwargs):
@@ -356,12 +296,121 @@ class EcommerceCalendarView(LoginRequiredMixin, TemplateView, View):
         booking = ModelInstanceGetter.get_instance(Booking, int(booking_id))
         booking.delete()
         
-        return HttpResponseRedirect(reverse('apps:calendar', kwargs=kwargs))
+        return HttpResponseRedirect(reverse(self.reverse_url, kwargs=kwargs))
+
+apps_booking_calendar_view = EcommerceBookingView.as_view()
 
 
-apps_calendar_calendar_view = EcommerceCalendarView.as_view()
+# ---------------------------------------------
+#               Users views 
+# ---------------------------------------------
 
-# ---------------- Sample view ----------------
+class UserListView(LoginRequiredMixin, TemplateView):
+    
+    template_name = "apps/users/apps-users-employees.html"
+    
+    @staticmethod
+    def get_client_list():
+        pass
+    
+    
+    @staticmethod
+    def get_employee_list():
+        
+        
+        def get(request):
+            
+            form = None
+            context = {
+                "employees": Employee.objects.all()
+            }
+            
+            # return render(request, self.list_template_name, context)
+        return get
+    
+    
+    def get(self, request,  *args, **kwargs):
+        
+        context = kwargs.get('context', {})
+        account = kwargs.get('account')
+        id = kwargs.get('id')
+        
+        if account == 'clients':
+            pass
+        # elif account == 'companies'
+        
+        
+        return render(request, self.template_name, context)
+    
+class UserView(LoginRequiredMixin, TemplateView):
+    
+    profile_template_name = "apps/users/apps-users-profile.html"
+    profile_model_templates = {
+        'client': (Client, "apps/users/apps-users-profile-client.html"),
+        'company': (Company, "apps/users/apps-users-profile-company.html"),
+        'owner': (Owner, "apps/users/apps-users-profile-owner.html"),
+        'employee': (Employee, "apps/users/apps-users-profile-employee.html"),
+    }
+    list_model_templates = {
+        'client': (Client, "apps/users/apps-users-list-client.html"),
+        'company': (Company, "apps/users/apps-users-list-company.html"),
+        'owner': (Owner, "apps/users/apps-users-list-owner.html"),
+        'employee': (Employee, "apps/users/apps-users-list-employee.html"),
+    }
+    
+    @staticmethod
+    def get_current_user():
+        
+        template_name="apps/users/apps-users-profile.html"
+        
+        def get(request):
+            
+            form = None
+            try:
+                emp = Employee.objects.filter(user=request.user)[0]
+                context = {
+                    "user_details": emp,
+                    "options": {
+                        "disable_message": True
+                    }
+                }
+                return render(request, template_name, context)
+            except (Employee.DoesNotExist, IndexError):
+                return render(request, template_name, {}) # should raise employee profile not found
+            
+        return get
+
+    
+    def get(self, request, *args, **kwargs):
+        context = kwargs.get('context', {})
+        context['profile'] = profile = kwargs.get('profile')
+        id = kwargs.get('id')
+        
+        # Set model and template to use
+        model, self.template_name = self.list_model_templates.get(profile, (None, None))
+        assert model
+        
+        # Get objects
+        if id:
+            obj = ModelInstanceGetter.get_instance(model, id)
+            if not obj:
+                context['error'] = 'No instance found'
+            else:
+                context['object'] = obj
+        else:
+            objs = model.objects.all()
+            context['list'] = objs
+        
+        return render(request, self.template_name, context)
+
+apps_users_profile_view = UserView.as_view()
+apps_users_myprofile_view = UserView.get_current_user()
+apps_users_list_view = UserListView.as_view()
+
+
+# ---------------------------------------------
+#             Placeholder views 
+# ---------------------------------------------
 class AppsView(LoginRequiredMixin, TemplateView):
     pass
 

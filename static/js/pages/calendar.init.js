@@ -80,7 +80,7 @@ File: Calendar init js
 
                 // not preset code
                 openNewBookingModal(info.date);
-                $("#btn-cancel-booking").hide();
+                $(".btn-cancel").hide();
 
                 // preset codes
                 $("#form-client-input").val();
@@ -116,7 +116,9 @@ File: Calendar init js
                     newEventData = null;
                     modalTitle.text('Edit Event');
                     newEventData = null;
-                    $("#btn-cancel-booking").show();
+
+                    // not preset code
+                    $(".btn-cancel").show();
                 },
                 // not preset code - eventDrop
                 eventDrop: function (info) {
@@ -160,6 +162,11 @@ File: Calendar init js
                     addEvent.modal('hide');
                     formEvent.submit();
                 }
+            });
+
+            // not preset code
+            $("#btn-cancel-button").on('click', function () {
+                $('#cancel-booking-modal').modal('show').focus();
             });
 
             $("#btn-cancel-booking").on('click', function (e) {

@@ -25,11 +25,7 @@ from .views import (
     apps_tasks_list_view,
     # apps_invoice_list_view,
     # apps_invoice_details_view,
-    # apps_contacts_usergrid_view,
-    # apps_contacts_userlist_view,
-    # apps_contacts_profile_view,
-    apps_users_myprofile_view,
-    apps_users_profile_view,
+    apps_users_view,
     # apps_horizontal_horizontal_view,
 )
 
@@ -45,9 +41,9 @@ urlpatterns = [
     # ---------------------------------------------------------
     
     #  ----------------------- PROFILES -----------------------
-    path("users/myprofile", view=apps_users_myprofile_view, name="users.myprofile"),
-    path("users/<str:profile>", view=apps_users_profile_view, name="users.list"),
-    path("users/<str:profile>/<int:id>", view=apps_users_profile_view, name="users.profile"),
+    # path("users/myprofile", view=apps_users_myprofile_view, name="users.myprofile"),
+    path("users/<str:profile>", view=apps_users_view, name="users.list"),
+    path("users/<str:profile>/<int:id>", view=apps_users_view, name="users.profile"),
     # ---------------------------------------------------------
     
     path(

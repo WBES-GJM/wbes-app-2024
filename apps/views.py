@@ -3,6 +3,7 @@ from typing import Any
 from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
 from datetime import datetime, timedelta
+from django.db import models
 from django.http.response import HttpResponse
 from django.utils import timezone
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
@@ -12,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.contrib.auth.models import User
 from .models import (
     Employee, Client, Company, Owner, 
     ConferenceRoom, Booking, Building
@@ -118,8 +120,6 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
         } if clients_query else {}
         return JsonResponse(response)
     
-
-
 apps_ajax_get_rooms = AjaxFunctionsView.get_rooms
 apps_ajax_get_client = AjaxFunctionsView.get_client
 
@@ -304,108 +304,61 @@ apps_booking_calendar_view = EcommerceBookingView.as_view()
 # ---------------------------------------------
 #               Users views 
 # ---------------------------------------------
-
-class UserListView(LoginRequiredMixin, TemplateView):
-    
-    template_name = "apps/users/apps-users-employees.html"
-    
-    @staticmethod
-    def get_client_list():
-        pass
-    
-    
-    @staticmethod
-    def get_employee_list():
-        
-        
-        def get(request):
-            
-            form = None
-            context = {
-                "employees": Employee.objects.all()
-            }
-            
-            # return render(request, self.list_template_name, context)
-        return get
-    
-    
-    def get(self, request,  *args, **kwargs):
-        
-        context = kwargs.get('context', {})
-        account = kwargs.get('account')
-        id = kwargs.get('id')
-        
-        if account == 'clients':
-            pass
-        # elif account == 'companies'
-        
-        
-        return render(request, self.template_name, context)
-    
+ 
 class UserView(LoginRequiredMixin, TemplateView):
     
-    profile_template_name = "apps/users/apps-users-profile.html"
     profile_model_templates = {
+        'user': (User, "apps/users/apps-users-profile-user.html"),
         'client': (Client, "apps/users/apps-users-profile-client.html"),
         'company': (Company, "apps/users/apps-users-profile-company.html"),
         'owner': (Owner, "apps/users/apps-users-profile-owner.html"),
         'employee': (Employee, "apps/users/apps-users-profile-employee.html"),
     }
+    
     list_model_templates = {
+        'user': (User, "apps/users/apps-users-list-user.html"),
         'client': (Client, "apps/users/apps-users-list-client.html"),
         'company': (Company, "apps/users/apps-users-list-company.html"),
         'owner': (Owner, "apps/users/apps-users-list-owner.html"),
         'employee': (Employee, "apps/users/apps-users-list-employee.html"),
     }
-    
-    @staticmethod
-    def get_current_user():
-        
-        template_name="apps/users/apps-users-profile.html"
-        
-        def get(request):
-            
-            form = None
-            try:
-                emp = Employee.objects.filter(user=request.user)[0]
-                context = {
-                    "user_details": emp,
-                    "options": {
-                        "disable_message": True
-                    }
-                }
-                return render(request, template_name, context)
-            except (Employee.DoesNotExist, IndexError):
-                return render(request, template_name, {}) # should raise employee profile not found
-            
-        return get
 
-    
+
     def get(self, request, *args, **kwargs):
         context = kwargs.get('context', {})
         context['profile'] = profile = kwargs.get('profile')
         id = kwargs.get('id')
         
-        # Set model and template to use
-        model, self.template_name = self.list_model_templates.get(profile, (None, None))
-        assert model
-        
-        # Get objects
-        if id:
-            obj = ModelInstanceGetter.get_instance(model, id)
-            if not obj:
-                context['error'] = 'No instance found'
-            else:
-                context['object'] = obj
+        # Get the individual object if theres id
+        # If not, display the list of objects
+        display_profile = bool(id)
+        if display_profile:
+            model, self.template_name = self.profile_model_templates.get(profile, (None, None))
+            return self._get_object_view(request, model, id, context)
         else:
-            objs = model.objects.all()
-            context['list'] = objs
+            model, self.template_name = self.list_model_templates.get(profile, (None, None))
+            return self._get_list_view(request, model, context)
+    
+    
+    def _get_object_view(self, request, model:models.Model, id:int, context:dict) -> HttpResponse:
+        obj = ModelInstanceGetter.get_instance(model, id)
+        key, val = ('object', obj) if obj \
+            else ('error', 'No instance found')
+            
+        # access "object" in view and get details such as
+        # object.id, object.name, etc.
+        context[key] = val
+        
+        return render(request, self.template_name, context)
+        
+        
+    def _get_list_view(self, request, model:models.Model, context:dict) -> HttpResponse:
+        objs = model.objects.all()
+        context['list'] = objs
         
         return render(request, self.template_name, context)
 
-apps_users_profile_view = UserView.as_view()
-apps_users_myprofile_view = UserView.get_current_user()
-apps_users_list_view = UserListView.as_view()
+apps_users_view = UserView.as_view()
 
 
 # ---------------------------------------------

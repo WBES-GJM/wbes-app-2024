@@ -63,6 +63,7 @@ THIRD_PARTY_APPS = [
     # "django_otp",
     # "django_otp.plugins.otp_totp",
     # "django_otp.plugins.otp_static",
+    
     # Enable two-factor auth.
     # "allauth_2fa",
    
@@ -83,6 +84,7 @@ MIDDLEWARE = [
     
     # AuthenticationMiddleware.
     # "django_otp.middleware.OTPMiddleware",
+    
     # Reset login flow middleware. If this middleware is included, the login
     # flow is reset if another page is loaded between login and successfully
     # entering two-factor credentials.
@@ -200,22 +202,18 @@ DEFAULT_FROM_EMAIL = ""
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_REQUIRED = False # True
+ACCOUNT_EMAIL_VERIFICATION = "none" # "mandatory"
 
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-
-
 SITE_ID = 2
-
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -228,6 +226,7 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+
 # To Customised Forms fields style
 ACCOUNT_FORMS = {
     "login": "dason.forms.UserLoginForm",

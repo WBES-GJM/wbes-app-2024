@@ -6,3 +6,6 @@ node_modules/
 WBES_environment/
 **/PyEnv/
 
+db.sqlite3
+**/db.sqlite3
+**/db.**

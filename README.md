@@ -45,7 +45,8 @@ To install the **python** dependencies needed, simply do the following.
 - The current database uses `sqlite3`.
 - It is NOT included in the git repository to avoid conflict in the db binary. 
 - Please stick to the default db name, `db.sqlite3` (unless setting up an external db).
-- Create a superuser with the command `py manage.py createsuperuser` to be able to login.
+
+If new setup
 - In the terminal, enter the command `py manage.py migrate`. This will create a new `db.sqlite3`.
 - Then create a superuser with the command `py manage.py createsuperuser` to be able to login.
 

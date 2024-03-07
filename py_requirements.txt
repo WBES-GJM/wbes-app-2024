@@ -1,3 +1,0 @@
-# install the following in the python environment
-
-pip install django django-allauth django-embed-video django-crispy-forms crispy-bootstrap5

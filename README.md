@@ -43,15 +43,18 @@ To install the **python** dependencies needed, simply do the following.
 ## Database
 
 - The current database uses `sqlite3`.
-- It is included in the git repository with the file name `db.sqlite3`.
-
-In case you want to reset the database
-
-- Rename the current one to have a backup.
+- It is NOT included in the git repository to avoid conflict in the db binary. 
+- Please stick to the default db name, `db.sqlite3` (unless setting up an external db).
+- Create a superuser with the command `py manage.py createsuperuser` to be able to login.
 - In the terminal, enter the command `py manage.py migrate`. This will create a new `db.sqlite3`.
 - Then create a superuser with the command `py manage.py createsuperuser` to be able to login.
 
-## Setup Footnote
+In case you want to reset the database
+- Rename the current one to have a backup (something like `db.sqlite3.backup1`).
+- In the terminal, enter the command `py manage.py migrate`. This will create a new `db.sqlite3`.
+- Then create a superuser with the command `py manage.py createsuperuser` to be able to login.
+
+## Setup Note
 
 In case you want to see the full documentation, e.g. the general webapp setup, how to setup the authenticated login, etc., kindly access the folder `/dason/documentation`, and you will see `setup.html`, `socialloginsetup.html`, etc.
 

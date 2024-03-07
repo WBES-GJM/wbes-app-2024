@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,11 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django.contrib.sites",
-    
     "apps",
     "components",
     "pages",
-   
 ]
 
 
@@ -192,7 +189,7 @@ MESSAGE_TAGS = {
 
 # SMTP Configure
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.elasticemail.com"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 2525
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = ""
@@ -205,13 +202,15 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
-ACCOUNT_LOGOUT_ON_GET = True
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_REQUIRED = False # True
 ACCOUNT_EMAIL_VERIFICATION = "none" # "mandatory"
-
-SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_UNIQUE_EMAIL = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGOUT_ON_GET = True
+
+SOCIALACCOUNT_QUERY_EMAIL = ACCOUNT_EMAIL_REQUIRED
+SOCIALACCOUNT_LOGIN_ON_GET = ACCOUNT_EMAIL_REQUIRED
 
 SITE_ID = 2
 

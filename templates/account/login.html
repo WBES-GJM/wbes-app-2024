@@ -36,26 +36,27 @@
                     {% endfor %}
                     {% csrf_token %}
                     {{ form|crispy }}   
-                    {% comment %} <div class="mt-4 mb-3">
+                    {% comment %} 
+                    <div class="mt-4 mb-3">
                         <a href="{% url 'account_reset_password' %}" class="text-muted text-decoration-underline">Forgot your password?</a>
-                    </div> {% endcomment %}
+                    </div> 
+                    {% endcomment %}
                     <div class="mt-3 mb-3">
                         <button class="btn btn-primary w-100 waves-effect waves-light" type="submit">Log In</button>
                     </div>
                 </form>
-
+                {% comment %}
                 <div class="mt-4 pt-2 text-center">
                     <div class="signin-other-title">
                         <h5 class="font-size-14 mb-3 text-muted fw-medium">- Sign in with -</h5>
                     </div>
-
                     <ul class="list-inline mb-0">
-                        {% comment %} <li class="list-inline-item">
+                         <li class="list-inline-item">
                             <a href="{% provider_login_url 'facebook' %}"
                                 class="social-list-item bg-primary text-white border-primary">
                                 <i class="mdi mdi-facebook"></i>
                             </a>
-                        </li> {% endcomment %}
+                        </li> 
                         <li class="list-inline-item">
                             <a href="{% provider_login_url 'google' %}"
                                 class="social-list-item bg-danger text-white border-danger">
@@ -67,6 +68,7 @@
                 <div class="mt-4 text-center">
                     <a href="{% url 'account_reset_password' %}" class="text-muted"><i class="mdi mdi-lock me-1"></i> Forgot your password?</a>
                 </div>
+                {% endcomment %}
                 <div class="mt-5 text-center">
                     <p class="text-muted mb-0">Don't have an account ? <a href="{% url 'account_signup' %}"
                             class="text-primary fw-semibold"> Signup now </a> </p>

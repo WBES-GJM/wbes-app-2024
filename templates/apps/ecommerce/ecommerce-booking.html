@@ -170,7 +170,6 @@
                                 <!-- end col -->
 
                             </div>
-
                             <div style='clear:both'></div>
 
 
@@ -294,7 +293,7 @@
                                                             data-bs-dismiss="modal">Close</button>
                                                         <!-- The save button is triggered to save the form in calendar.init.js -->
                                                         <button type="button" form="booking-form" class="btn btn-success"
-                                                            id="btn-save-event">Save</button> 
+                                                            id="btn-save-button">Save</button> 
                                                     </div>
                                                 </div>
                                             </form>
@@ -358,6 +357,25 @@
 
     // For calendar.init.js
     var BOOKINGS = '{{ bookings | safe }}';
+    var fetchBookings = BOOKINGS ? JSON.parse(BOOKINGS) : [];
+
+    BOOKINGS = [];
+    var formatDate = (argsList) => {
+        // year, month, day, Hour, Minute
+        // return new Date(argsList[0], argsList[1], argsList[2], argsList[3], 0, 0)
+
+        var pad2Digits = (num) => {
+            return String(num).padStart(2, '0');
+        }
+
+        return new Date(`${argsList[0]}-${pad2Digits(argsList[1]+1)}-${pad2Digits(argsList[2])}T${pad2Digits(argsList[3])}:00:00`)
+    }
+    for (const bk of fetchBookings) {
+        bk.start = formatDate(bk.start);
+        bk.end = formatDate(bk.end);
+        BOOKINGS.push(bk);
+    }
+    console.log(BOOKINGS)
 
 
     // ------------------------------------------
@@ -431,6 +449,8 @@
 
     function searchClient(value) {
         $('#newbooking-client-dropdown-menu .dropdown-item').remove();
+        $(`#id_client option:selected`).removeAttr('selected');
+        $("#btn-save-button").attr('disabled', true);
 
         if (value.length < 3) {
             $('#newbooking-client-value').val('');
@@ -454,6 +474,7 @@
                         // but it doesnt... work around is the below code
                         $(`#id_client option:selected`).removeAttr('selected');
                         $(`#id_client option[value="${id}"]`).attr('selected', 'selected');
+                        $("#btn-save-button").attr('disabled', false);
                     });
                 $('#newbooking-client-dropdown-menu').append(clientDropdownItem);
             }
@@ -520,6 +541,8 @@
     }
 
     function openBookingModal(selectedEvent) {
+        $("#btn-cancel-button").show();
+
         // Change form method to put, meaning edit
         $('#booking-method').val('PUT');
 
@@ -552,6 +575,9 @@
     }
 
     function openNewBookingModal(clickedDate) {
+        $("#btn-cancel-button").hide();
+        $("#btn-save-button").attr('disabled', true);
+
         // Change form method to post
         $('#booking-method').val('POST');
 
@@ -582,7 +608,7 @@
         $('#opened-booking-id').val('');
     }
 
-    function onDragBooking(selectedEvent) {
+    function onDateChangeBooking(selectedEvent) {
         // Change form method to put, meaning edit
         $('#booking-method').val('PUT');
 
@@ -603,6 +629,9 @@
         $('#booking-form').submit();
     }
 
+    function onViewChangeBooking(viewName, events) {
+        sessionStorage.setItem("calendarDefaultView", viewName.type);
+    }
 
     // ------------------------------------------
     //     For submissions and cancellations

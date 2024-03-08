@@ -179,10 +179,10 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         bookings_list = [
             {
                 'id': bk.pk,
-                'title': bk.client.name \
-                    if request.user.id in \
-                    list(bk.client.users.all().values_list('id', flat=True)) \
-                    else '',
+                'title': bk.client.name, # \
+                    # if request.user.id in \
+                    # list(bk.client.users.all().values_list('id', flat=True)) \
+                    # else '',
                 'start': [
                     bk.start_datetime.year,
                     bk.start_datetime.month-1,
@@ -195,8 +195,8 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
                     bk.end_datetime.day,
                     bk.end_datetime.hour,
                 ],
-                'duration': bk.duration_hours,
-                # 'allDay': False,
+                # 'duration': bk.duration_hours,
+                'allDay': False,
                 # 'url': '',
                 # 'className': 'bg-info',
             } for bk in bookings_query

@@ -87,8 +87,9 @@ File: Calendar init js
             eventDurationEditable: true,
             defaultView: initialViewOnSession ? initialViewOnSession : 'dayGridMonth',
             slotDuration: '01:00:00',
-            firstHour: 8,
-            lastHour: 11,
+            minTime: String(BUSINESS_HOURS.start)+':00:00',
+            maxTime: String(BUSINESS_HOURS.end)+':00:00',
+            scrollTimeReset: false,
             themeSystem: 'bootstrap',
             header: {
                 left: 'prev,next today',

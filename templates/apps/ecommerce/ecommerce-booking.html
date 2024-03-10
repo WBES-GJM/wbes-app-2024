@@ -219,7 +219,14 @@
                                                             <select class="form-control form-select" 
                                                                 id="newbooking-start-time-input" 
                                                                 name="newbooking_start_time_input">
-                                                                <option value="8" selected>8:00 AM</option>
+                                                                {% for hr, disp in business_hours_clock %}
+                                                                {% if hr == 8 %}
+                                                                <option value="{{hr}}" selected>{{disp}}</option>
+                                                                {% else %}
+                                                                <option value="{{hr}}">{{disp}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                                <!-- <option value="8" selected>8:00 AM</option>
                                                                 <option value="9">9:00 AM</option>
                                                                 <option value="10">10:00 AM</option>
                                                                 <option value="11">11:00 AM</option>
@@ -233,7 +240,7 @@
                                                                 <option value="19">7:00 PM</option>
                                                                 <option value="20">8:00 PM</option>
                                                                 <option value="21">9:00 PM</option>
-                                                                <option value="22">10:00 PM</option>
+                                                                <option value="22">10:00 PM</option> -->
                                                             </select>
                                                             <!-- <div class="invalid-feedback">
                                                                 Please select a valid event category
@@ -275,11 +282,16 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-12" id="newbooking-check-use-end-container">
+                                                    <div class="col-12" id="newbooking-check-use-end-container" style="display: flex;">
                                                         <div class="mt-1">
                                                             <input type="checkbox" class="form-check-input" 
                                                                 id="newbooking-check-use-end" name="newbooking_check_use_end">
-                                                            <label for="newbooking-check-use-end">Use End Date instead</label>
+                                                            <label for="newbooking-check-use-end">Use End Date</label>
+                                                        </div>
+                                                        <div class="mt-1" style="margin-left: 50px;">
+                                                            <input type="checkbox" class="form-check-input" 
+                                                                id="newbooking-check-allday" name="newbooking_check_allday">
+                                                            <label for="newbooking-check-allday">Reserve All Day</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -344,6 +356,11 @@
             {% endblock footer %}
         </div>
         <!-- end main content-->
+        <style>
+            .fc-timeGrid-view tr {
+                height: 52px;
+            }
+        </style>
 {% endblock content %}
 {% block extra_js %}
 <script src="{% static 'libs/@fullcalendar/core/main.min.js' %}"></script>
@@ -356,26 +373,29 @@
 <script>
 
     // For calendar.init.js
+    var BUSINESS_HOURS = '{{ business_hours | safe }}';
     var BOOKINGS = '{{ bookings | safe }}';
     var fetchBookings = BOOKINGS ? JSON.parse(BOOKINGS) : [];
 
     BOOKINGS = [];
-    var formatDate = (argsList) => {
-        // year, month, day, Hour, Minute
-        // return new Date(argsList[0], argsList[1], argsList[2], argsList[3], 0, 0)
-
-        var pad2Digits = (num) => {
-            return String(num).padStart(2, '0');
+    function initBookings() {
+        var formatDate = (argsList) => {
+            // year, month, day, Hour, Minute
+            // return new Date(argsList[0], argsList[1], argsList[2], argsList[3], 0, 0)
+    
+            var pad2Digits = (num) => {
+                return String(num).padStart(2, '0');
+            }
+    
+            return new Date(`${argsList[0]}-${pad2Digits(argsList[1]+1)}-${pad2Digits(argsList[2])}T${pad2Digits(argsList[3])}:00:00`)
         }
-
-        return new Date(`${argsList[0]}-${pad2Digits(argsList[1]+1)}-${pad2Digits(argsList[2])}T${pad2Digits(argsList[3])}:00:00`)
+        for (const bk of fetchBookings) {
+            bk.start = formatDate(bk.start);
+            bk.end = formatDate(bk.end);
+            BOOKINGS.push(bk);
+        }
     }
-    for (const bk of fetchBookings) {
-        bk.start = formatDate(bk.start);
-        bk.end = formatDate(bk.end);
-        BOOKINGS.push(bk);
-    }
-    console.log(BOOKINGS)
+    initBookings();
 
 
     // ------------------------------------------
@@ -437,14 +457,37 @@
                 $('#newbooking-end-date-input').attr('required', true);
                 $('#newbooking-end-time-input').attr('required', true);
             } else {
-                $('#newbooking-duration-hours').show();
+                if (!$('#id_all_day').prop('checked')) {
+                    $('#newbooking-duration-hours').show();
+                }
                 $('#newbooking-end-datetime').hide();
                 $('#newbooking-duration-hours-input').attr('required', true);
                 $('#newbooking-end-date-input').attr('required', false);
                 $('#newbooking-end-time-input').attr('required', false);
             }
         });
-        
+
+        $('#newbooking-check-allday').on('change', function () {
+            $('#id_all_day').prop('checked', this.checked);
+            
+            if (this.checked) {
+                $('#newbooking-duration-hours').hide();
+                $('#newbooking-start-time-input').hide();
+                $('#newbooking-end-time-input').hide();
+                $('#newbooking-duration-hours-input').attr('required', false);
+                $('#newbooking-start-time-input').attr('required', false);
+                $('#newbooking-end-time-input').attr('required', false);
+            } else {
+                if (!$('#newbooking-check-use-end').prop('checked')) {
+                    $('#newbooking-duration-hours').show();
+                }
+                $('#newbooking-start-time-input').show();
+                $('#newbooking-end-time-input').show();
+                $('#newbooking-duration-hours-input').attr('required', true);
+                $('#newbooking-start-time-input').attr('required', true);
+                $('#newbooking-end-time-input').attr('required', true);
+            }
+        });
     }
 
     function searchClient(value) {
@@ -500,7 +543,9 @@
     function initDateTimeInputs() {
         $('#newbooking-start-date-input').on('change', function () {
             $('#newbooking-end-date-input').attr('min', this.value);
-            $('#newbooking-end-date-input').val(this.value);
+            if (!$('#newbooking-end-date-input').val()){
+                $('#newbooking-end-date-input').val(this.value);
+            }
             setTimeOptions();
         });
     
@@ -524,14 +569,18 @@
 
             $('#newbooking-end-time-input option').show();
             $('#newbooking-end-time-input option').filter(function () { 
-                return parseInt($(this).val()) <= startTime
+                return (parseInt($(this).val()) <= startTime)
             }).hide();
         } else {
             $('#newbooking-end-time-input option').show();
         }
     }
 
-    function setDateInputs(start, end) {
+    function setDateInputs(start, end, allDay) {
+        if (!end) {
+            end = new Date(start);
+            end.setHours(22, 0, 0);
+        }
         $('#newbooking-start-date-input').val(start.toLocaleDateString('en-ca'));
         $('#newbooking-end-date-input').val(end.toLocaleDateString('en-ca'));
         $('#newbooking-start-time-input option:selected').removeAttr('selected');
@@ -560,6 +609,7 @@
         dateStr = tomorrowsDate.toLocaleDateString('en-ca');
         $('#newbooking-start-date-input').attr('min', dateStr);
         $('#newbooking-end-date-input').attr('min', dateStr);
+        console.log(selectedEvent);
         setDateInputs(selectedEvent.start, selectedEvent.end);
         setTimeOptions();
 
@@ -623,7 +673,7 @@
         $('#opened-booking-id').val(selectedEvent.id);
 
         // Set new date values
-        setDateInputs(selectedEvent.start, selectedEvent.end);
+        setDateInputs(selectedEvent.start, selectedEvent.end, selectedEvent.allDay);
 
         // Submit form
         $('#booking-form').submit();

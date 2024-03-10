@@ -615,22 +615,35 @@ class ConferenceRoom(models.Model):
         return f"{self.name} with max capacity of {self.max_capacity} and seating capacity of {self.seating_capacity}"
 
 class Booking(models.Model):
+        
+    BUSINESS_HOURS = {
+        'start': 8,
+        'end': 22,
+    }
+    
+    MAX_DURATION = BUSINESS_HOURS['end'] - BUSINESS_HOURS['start']
+    
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE)
     start_datetime = models.DateTimeField(blank=True)
     end_datetime = models.DateTimeField(null=True, blank=True)
     duration_hours = models.PositiveIntegerField(default=1)
+    all_day = models.BooleanField(default=False, blank=True)
     confirmation = models.CharField(max_length=500, blank=True)
 
     # Override
     def save(self, *args, **kwargs):
-        if not self.end_datetime:
-            self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
+        if not self.all_day:
+            if not self.end_datetime:
+                self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
+            else:
+                difference = self.end_datetime - self.start_datetime
+                hours_from_days = difference.days * 24
+                hours_from_seconds = difference.seconds//3600
+                self.duration_hours = hours_from_days + hours_from_seconds
         else:
-            difference = self.end_datetime - self.start_datetime
-            hours_from_days = difference.days * 24
-            hours_from_seconds = difference.seconds//3600
-            self.duration_hours = hours_from_days + hours_from_seconds
+            self.duration_hours = self.MAX_DURATION
+            self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
             
         # Generate a "mashup" confirmation number
         # name_slug = slugify(self.client.name)

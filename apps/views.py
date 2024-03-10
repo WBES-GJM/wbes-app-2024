@@ -196,7 +196,7 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
                     bk.end_datetime.hour,
                 ],
                 # 'duration': bk.duration_hours,
-                'allDay': False,
+                'allDay': bk.all_day,
                 # 'url': '',
                 # 'className': 'bg-info',
             } for bk in bookings_query
@@ -214,11 +214,21 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         }
         '''
         
+        # Business hours of calendar
+        business_hours_dict = Booking.BUSINESS_HOURS
+        
         # Transform into JSON objects
         bookings = json.dumps(bookings_list, cls=DjangoJSONEncoder)
+        business_hours = json.dumps(business_hours_dict, cls=DjangoJSONEncoder)
         
         # Return with context
         context['bookings'] = bookings
+        context['business_hours'] = business_hours
+        context['business_hours_clock'] = [
+            (hr, f'{(hr if hr <= 12 else hr-12):02d}:00 ' + ('AM' if hr<12 else 'PM'))
+            for hr in range(business_hours_dict['start'], business_hours_dict['end']+1)
+        ]
+        print(context)
 
         return render(request, self.template_name, context)
     

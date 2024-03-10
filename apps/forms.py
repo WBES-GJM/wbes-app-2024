@@ -9,7 +9,7 @@ class BookingForm(forms.ModelForm):
     
     class Meta:
         model = Booking
-        fields = ['client', 'room']
+        fields = ['client', 'room', 'all_day']
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('current_user', None)

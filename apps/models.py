@@ -628,22 +628,17 @@ class Booking(models.Model):
     start_datetime = models.DateTimeField(blank=True)
     end_datetime = models.DateTimeField(null=True, blank=True)
     duration_hours = models.PositiveIntegerField(default=1)
-    all_day = models.BooleanField(default=False, blank=True)
     confirmation = models.CharField(max_length=500, blank=True)
 
     # Override
     def save(self, *args, **kwargs):
-        if not self.all_day:
-            if not self.end_datetime:
-                self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
-            else:
-                difference = self.end_datetime - self.start_datetime
-                hours_from_days = difference.days * 24
-                hours_from_seconds = difference.seconds//3600
-                self.duration_hours = hours_from_days + hours_from_seconds
-        else:
-            self.duration_hours = self.MAX_DURATION
+        if not self.end_datetime:
             self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
+        else:
+            difference = self.end_datetime - self.start_datetime
+            hours_from_days = difference.days * 24
+            hours_from_seconds = difference.seconds//3600
+            self.duration_hours = hours_from_days + hours_from_seconds
             
         # Generate a "mashup" confirmation number
         # name_slug = slugify(self.client.name)

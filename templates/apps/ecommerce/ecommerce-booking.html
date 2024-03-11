@@ -222,6 +222,8 @@
                                                                 {% for hr, disp in business_hours_clock %}
                                                                 {% if hr == 8 %}
                                                                 <option value="{{hr}}" selected>{{disp}}</option>
+                                                                {% elif hr == business_hours_clock.end %}
+                                                                <div></div>
                                                                 {% else %}
                                                                 <option value="{{hr}}">{{disp}}</option>
                                                                 {% endif %}
@@ -264,21 +266,15 @@
                                                             <select class="form-control form-select" 
                                                                 name="newbooking_end_time_input"
                                                                 id="newbooking-end-time-input">
-                                                                <option value="8">8:00 AM</option>
-                                                                <option value="9" selected>9:00 AM</option>
-                                                                <option value="10">10:00 AM</option>
-                                                                <option value="11">11:00 AM</option>
-                                                                <option value="12">12:00 PM</option>
-                                                                <option value="13">1:00 PM</option>
-                                                                <option value="14">2:00 PM</option>
-                                                                <option value="15">3:00 PM</option>
-                                                                <option value="16">4:00 PM</option>
-                                                                <option value="17">5:00 PM</option>
-                                                                <option value="18">6:00 PM</option>
-                                                                <option value="19">7:00 PM</option>
-                                                                <option value="20">8:00 PM</option>
-                                                                <option value="21">9:00 PM</option>
-                                                                <option value="22">10:00 PM</option>
+                                                                {% for hr, disp in business_hours_clock %}
+                                                                {% if hr == 9 %}
+                                                                <option value="{{hr}}" selected>{{disp}}</option>
+                                                                {% elif hr == business_hours.start %}
+                                                                <div></div>
+                                                                {% else %}
+                                                                <option value="{{hr}}">{{disp}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
                                                             </select>
                                                         </div>
                                                     </div>
@@ -288,11 +284,11 @@
                                                                 id="newbooking-check-use-end" name="newbooking_check_use_end">
                                                             <label for="newbooking-check-use-end">Use End Date</label>
                                                         </div>
-                                                        <div class="mt-1" style="margin-left: 50px;">
+                                                        <!-- <div class="mt-1" style="margin-left: 50px;">
                                                             <input type="checkbox" class="form-check-input" 
                                                                 id="newbooking-check-allday" name="newbooking_check_allday">
                                                             <label for="newbooking-check-allday">Reserve All Day</label>
-                                                        </div>
+                                                        </div> -->
                                                     </div>
                                                 </div>
                                                 <div class="row mt-2">
@@ -374,10 +370,13 @@
 
     // For calendar.init.js
     var BUSINESS_HOURS = '{{ business_hours | safe }}';
+    BUSINESS_HOURS = BUSINESS_HOURS ? JSON.parse(BUSINESS_HOURS) : [];
+
     var BOOKINGS = '{{ bookings | safe }}';
     var fetchBookings = BOOKINGS ? JSON.parse(BOOKINGS) : [];
 
     BOOKINGS = [];
+    var bookingsDict = {}
     function initBookings() {
         var formatDate = (argsList) => {
             // year, month, day, Hour, Minute
@@ -389,11 +388,14 @@
     
             return new Date(`${argsList[0]}-${pad2Digits(argsList[1]+1)}-${pad2Digits(argsList[2])}T${pad2Digits(argsList[3])}:00:00`)
         }
+        var initialViewOnSession = sessionStorage.getItem("calendarDefaultView");
         for (const bk of fetchBookings) {
             bk.start = formatDate(bk.start);
             bk.end = formatDate(bk.end);
+            bk.allDay = true;
             BOOKINGS.push(bk);
         }
+
     }
     initBookings();
 
@@ -457,35 +459,11 @@
                 $('#newbooking-end-date-input').attr('required', true);
                 $('#newbooking-end-time-input').attr('required', true);
             } else {
-                if (!$('#id_all_day').prop('checked')) {
-                    $('#newbooking-duration-hours').show();
-                }
+                $('#newbooking-duration-hours').show();
                 $('#newbooking-end-datetime').hide();
                 $('#newbooking-duration-hours-input').attr('required', true);
                 $('#newbooking-end-date-input').attr('required', false);
                 $('#newbooking-end-time-input').attr('required', false);
-            }
-        });
-
-        $('#newbooking-check-allday').on('change', function () {
-            $('#id_all_day').prop('checked', this.checked);
-            
-            if (this.checked) {
-                $('#newbooking-duration-hours').hide();
-                $('#newbooking-start-time-input').hide();
-                $('#newbooking-end-time-input').hide();
-                $('#newbooking-duration-hours-input').attr('required', false);
-                $('#newbooking-start-time-input').attr('required', false);
-                $('#newbooking-end-time-input').attr('required', false);
-            } else {
-                if (!$('#newbooking-check-use-end').prop('checked')) {
-                    $('#newbooking-duration-hours').show();
-                }
-                $('#newbooking-start-time-input').show();
-                $('#newbooking-end-time-input').show();
-                $('#newbooking-duration-hours-input').attr('required', true);
-                $('#newbooking-start-time-input').attr('required', true);
-                $('#newbooking-end-time-input').attr('required', true);
             }
         });
     }
@@ -576,7 +554,7 @@
         }
     }
 
-    function setDateInputs(start, end, allDay) {
+    function setDateInputs(start, end) {
         if (!end) {
             end = new Date(start);
             end.setHours(22, 0, 0);
@@ -609,7 +587,6 @@
         dateStr = tomorrowsDate.toLocaleDateString('en-ca');
         $('#newbooking-start-date-input').attr('min', dateStr);
         $('#newbooking-end-date-input').attr('min', dateStr);
-        console.log(selectedEvent);
         setDateInputs(selectedEvent.start, selectedEvent.end);
         setTimeOptions();
 
@@ -680,7 +657,11 @@
     }
 
     function onViewChangeBooking(viewName, events) {
+        // if (sessionStorage.getItem("calendarDefaultView") === viewName.type) {
+        //     return;
+        // }
         sessionStorage.setItem("calendarDefaultView", viewName.type);
+        // window.location.reload();
     }
 
     // ------------------------------------------

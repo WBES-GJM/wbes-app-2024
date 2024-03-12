@@ -623,8 +623,8 @@ class ConferenceRoom(models.Model):
         ('North Conference Room', 'North Conference Room'),
         ('Put Your Conference Room Name Here', 'Put Your Conference Room Name Here')
     ]
-    name = models.CharField(max_length=50)
-    building = models.ManyToManyField(Building)
+    name = models.CharField(max_length=100)
+    building = models.ForeignKey(Building, on_delete=models.CASCADE)
     max_capacity = models.PositiveIntegerField(default=12)
     seating_capacity = models.PositiveIntegerField(default=10)
     

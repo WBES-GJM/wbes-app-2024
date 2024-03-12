@@ -1,4 +1,5 @@
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 from decimal import Decimal
@@ -590,11 +591,27 @@ class Client(models.Model):
 
 class Building(models.Model):
     BUILDINGS = [
+        ('CustomInput', '--- Custom Input ---'),
         ('West Boca Executive Suites', 'West Boca Executive Suites'),
         ('7777 Glade Road', '7777 Glade Road'),
     ]
-    name = models.CharField(max_length=500)
-    address = models.CharField(max_length=500)
+    DEFAULT_BUILDING_ADDRESS = {
+        'West Boca Executive Suites': 'West Boca Executive Suites Address',
+        '7777 Glade Road': '7777 Glade Road Address',
+    }
+    name = models.CharField(max_length=500, blank=True)
+    address = models.CharField(max_length=500, blank=True)
+    select_default = models.CharField(max_length=500, choices=BUILDINGS, default='CustomInput')
+
+    # Override
+    def save(self, *args, **kwargs):
+        if self.select_default  == 'CustomInput':
+            if not (self.address or self.name):
+                raise ValidationError('Either Name or Address is required when Custom Input is selected')
+        else:
+            self.name = self.select_default
+            self.address = self.DEFAULT_BUILDING_ADDRESS[self.select_default]
+        super(Building, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - {self.address}"

@@ -280,7 +280,8 @@ class Virtual(models.Model):
     package = models.CharField(max_length=7, choices=PACKAGE)
 
     def __str__(self):
-        return f"{self.user} is a {self.package} virtual customer"
+        return f"Grants {self.package} virtual privileges to clients."
+        # return f"{self.user} is a {self.package} virtual customer"
 
 class Company(models.Model):
     
@@ -544,7 +545,7 @@ class AccessCard(models.Model):
 
 class Client(models.Model):
     DEFAULT_HOURLY_RATE = [('35', '$35.00')]
-    users = models.ManyToManyField(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE) # good idea if theres multiple owners

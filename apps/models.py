@@ -1,4 +1,5 @@
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 from decimal import Decimal
@@ -280,7 +281,8 @@ class Virtual(models.Model):
     package = models.CharField(max_length=7, choices=PACKAGE)
 
     def __str__(self):
-        return f"{self.user} is a {self.package} virtual customer"
+        return f"Grants {self.package} virtual privileges to clients."
+        # return f"{self.user} is a {self.package} virtual customer"
 
 class Company(models.Model):
     
@@ -544,7 +546,7 @@ class AccessCard(models.Model):
 
 class Client(models.Model):
     DEFAULT_HOURLY_RATE = [('35', '$35.00')]
-    users = models.ManyToManyField(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE) # good idea if theres multiple owners
@@ -589,11 +591,27 @@ class Client(models.Model):
 
 class Building(models.Model):
     BUILDINGS = [
+        ('CustomInput', '--- Custom Input ---'),
         ('West Boca Executive Suites', 'West Boca Executive Suites'),
         ('7777 Glade Road', '7777 Glade Road'),
     ]
-    name = models.CharField(max_length=500)
-    address = models.CharField(max_length=500)
+    DEFAULT_BUILDING_ADDRESS = {
+        'West Boca Executive Suites': 'West Boca Executive Suites Address',
+        '7777 Glade Road': '7777 Glade Road Address',
+    }
+    name = models.CharField(max_length=500, blank=True)
+    address = models.CharField(max_length=500, blank=True)
+    select_default = models.CharField(max_length=500, choices=BUILDINGS, default='CustomInput')
+
+    # Override
+    def save(self, *args, **kwargs):
+        if self.select_default  == 'CustomInput':
+            if not (self.address or self.name):
+                raise ValidationError('Either Name or Address is required when Custom Input is selected')
+        else:
+            self.name = self.select_default
+            self.address = self.DEFAULT_BUILDING_ADDRESS[self.select_default]
+        super(Building, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - {self.address}"
@@ -605,8 +623,8 @@ class ConferenceRoom(models.Model):
         ('North Conference Room', 'North Conference Room'),
         ('Put Your Conference Room Name Here', 'Put Your Conference Room Name Here')
     ]
-    name = models.CharField(max_length=50)
-    building = models.ManyToManyField(Building)
+    name = models.CharField(max_length=100)
+    building = models.ForeignKey(Building, on_delete=models.CASCADE)
     max_capacity = models.PositiveIntegerField(default=12)
     seating_capacity = models.PositiveIntegerField(default=10)
     
@@ -628,22 +646,17 @@ class Booking(models.Model):
     start_datetime = models.DateTimeField(blank=True)
     end_datetime = models.DateTimeField(null=True, blank=True)
     duration_hours = models.PositiveIntegerField(default=1)
-    all_day = models.BooleanField(default=False, blank=True)
     confirmation = models.CharField(max_length=500, blank=True)
 
     # Override
     def save(self, *args, **kwargs):
-        if not self.all_day:
-            if not self.end_datetime:
-                self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
-            else:
-                difference = self.end_datetime - self.start_datetime
-                hours_from_days = difference.days * 24
-                hours_from_seconds = difference.seconds//3600
-                self.duration_hours = hours_from_days + hours_from_seconds
-        else:
-            self.duration_hours = self.MAX_DURATION
+        if not self.end_datetime:
             self.end_datetime = self.start_datetime + timedelta(hours=self.duration_hours)
+        else:
+            difference = self.end_datetime - self.start_datetime
+            hours_from_days = difference.days * 24
+            hours_from_seconds = difference.seconds//3600
+            self.duration_hours = hours_from_days + hours_from_seconds
             
         # Generate a "mashup" confirmation number
         # name_slug = slugify(self.client.name)

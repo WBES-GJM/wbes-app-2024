@@ -138,6 +138,13 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         datetime_str = f'{date} {hour}:00:00'
         return datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
     
+    def format_time(self, hour: int, full: bool=True, min: bool=False) -> str:
+        tm = hour if hour <= 12 else hour-12
+        if full:
+            return f'{tm:02d}:00 ' + ('AM' if hour<12 else 'PM')
+        else:
+            return str(tm) + ('a' if hour<12 else 'p')
+         
     
     def get(self, request,  *args, **kwargs):
         # Get parameters
@@ -179,7 +186,10 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         bookings_list = [
             {
                 'id': bk.pk,
-                'title': bk.client.name, # \
+                'title': 
+                    # f'{self.format_time(bk.start_datetime.hour, full=False)}-' \
+                    # + f'{self.format_time(bk.end_datetime.hour, full=False)} | ' \
+                     bk.client.name, # \
                     # if request.user.id in \
                     # list(bk.client.users.all().values_list('id', flat=True)) \
                     # else '',
@@ -196,7 +206,7 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
                     bk.end_datetime.hour,
                 ],
                 # 'duration': bk.duration_hours,
-                'allDay': bk.all_day,
+                # 'allDay': bk.all_day,
                 # 'url': '',
                 # 'className': 'bg-info',
             } for bk in bookings_query
@@ -225,10 +235,9 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         context['bookings'] = bookings
         context['business_hours'] = business_hours
         context['business_hours_clock'] = [
-            (hr, f'{(hr if hr <= 12 else hr-12):02d}:00 ' + ('AM' if hr<12 else 'PM'))
+            (hr, self.format_time(hr))
             for hr in range(business_hours_dict['start'], business_hours_dict['end']+1)
         ]
-        print(context)
 
         return render(request, self.template_name, context)
     

@@ -61,6 +61,7 @@ File: Calendar init js
         // var draggableEl = document.getElementById('external-events');
         var calendarEl = document.getElementById('calendar');
 
+
         function addNewEvent(info) {
             // preset codes
             addEvent.modal('show');
@@ -78,6 +79,9 @@ File: Calendar init js
         }
 
         var initialViewOnSession = sessionStorage.getItem("calendarDefaultView");
+        if (!initialViewOnSession) {
+            initialViewOnSession = "dayGridMonth";
+        }
         var calendar = new FullCalendar.Calendar(calendarEl, {
             plugins: ['bootstrap', 'interaction', 'dayGrid', 'timeGrid'],
             editable: true,
@@ -85,11 +89,11 @@ File: Calendar init js
             selectable: true,
             eventResizableFromStart: true,
             eventDurationEditable: true,
-            defaultView: initialViewOnSession ? initialViewOnSession : 'dayGridMonth',
+            displayEventTime: true,
+            defaultView: initialViewOnSession,
             slotDuration: '01:00:00',
             minTime: String(BUSINESS_HOURS.start)+':00:00',
             maxTime: String(BUSINESS_HOURS.end)+':00:00',
-            scrollTimeReset: false,
             themeSystem: 'bootstrap',
             header: {
                 left: 'prev,next today',
@@ -117,7 +121,7 @@ File: Calendar init js
             dateClick: function (info) {
                 addNewEvent(info);
             },
-            // not preset code - eventDrop
+            // not preset code
             eventDrop: function (info) {
                 selectedEvent = info.event;
                 onDateChangeBooking(selectedEvent); // in ecommerce-booking.html template

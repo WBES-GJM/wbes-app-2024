@@ -36,8 +36,8 @@ class Command(BaseCommand):
         ],
         Client: [
             # The EMPLOYEE unique identifier is set to [lastname]-[middlename]-[firstname]
-            {'id': 1, 'user':'john', 'name' : 'KMS Holdings' , 'employee':'Sample-Mars-Kim', 'owner': 'Saints-Maer-Kimberly', 'company': 'KMS Inc.', 'virtual': 'Gold', 'timestamp': datetime.now()},
-            {'id': 2, 'user':'john', 'name' : 'The KYS Group' , 'employee':'Santa-Yranus-Kevin', 'owner': 'Saens-Yajger-Karlson', 'company': 'KYS RN Universe', 'virtual': 'Silver', 'timestamp': datetime.now() },
+            {'id': 1, 'user':'john', 'name' : 'KMS Holdings' , 'employee':'Sample-Mars-Kim', 'owner': 'Saints-Maer-Kimberly', 'company': 'KMS Inc.', 'virtual': 'Gold', },
+            {'id': 2, 'user':'john', 'name' : 'The KYS Group' , 'employee':'Santa-Yranus-Kevin', 'owner': 'Saens-Yajger-Karlson', 'company': 'KYS RN Universe', 'virtual': 'Silver',  },
         ],
         Building:[
             {'id': 1, 'name':'Santa Ana Suites Extension Building', 'address': '92nd Block, Santa Ana, California'},
@@ -83,27 +83,30 @@ class Command(BaseCommand):
                     if fname == 'user':
                         value = User.objects.get(username=value)
                     elif fname == 'employee':
-                        ename = value.split('-')
+                        name = value.split('-')
                         value = Employee.objects.get(
-                            last_name_employee=ename[0], 
-                            middle_name_employee=ename[1], 
-                            first_name_employee=ename[2]
+                            last_name_employee=name[0], 
+                            middle_name_employee=name[1], 
+                            first_name_employee=name[2]
                         )
                     elif fname == 'owner':
-                        ename = value.split('-')
+                        name = value.split('-')
                         value = Owner.objects.get(
-                            last_name_employee=ename[0], 
-                            middle_name_employee=ename[1], 
-                            first_name_employee=ename[2]
+                            last_name_owner=name[0], 
+                            middle_name_owner=name[1], 
+                            first_name_owner=name[2]
                         )
+                    elif fname == 'client':
+                        value = Client.objects.get(name=value)
                     elif fname == 'company' and model is not Company:
-                        print(value)
                         value = Company.objects.get(company=value)
                     elif fname == 'building':
                         value = Building.objects.get(name=value)
                     elif fname == 'room':
                         rname = value.split('-')
                         value = ConferenceRoom.objects.get(name=rname[0], building__name=rname[1])
+                    elif fname == 'virtual':
+                        value = Virtual.objects.get(package=value)
                     setattr(new_obj, fname, value)
                     print(f'Added new {model._meta.model_name}' )
                         

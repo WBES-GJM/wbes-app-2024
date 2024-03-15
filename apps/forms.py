@@ -22,8 +22,10 @@ class BookingForm(forms.ModelForm):
         include_id = []
         
         for client in client_query:
-            if user.id in client.users.all().values_list('id', flat=True):
-                include_id.append(client.pk)
+            # If we only want to show client records that the current logged-in user created
+            # if user.id in client.users.all().values_list('id', flat=True):
+            #     include_id.append(client.pk)
+            include_id.append(client.pk)
                 
         self.fields['client'].queryset = client_query.filter(id__in=include_id)
         

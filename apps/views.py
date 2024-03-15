@@ -170,7 +170,7 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
             return render(request, self.template_name, context)
         
         # Set objects
-        building_id = room.building.all()[0].id
+        building_id = room.building.pk
         rooms_query = ConferenceRoom.objects.filter(building__id=building_id)
         context['rooms'] = rooms_query
         context['selected_room'] = {

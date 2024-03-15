@@ -179,7 +179,7 @@ class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
         }
         
         # Set form
-        context['form'] = BookingForm(current_user=request.user, initial={'room': room})
+        context['form'] = BookingForm(initial={'room': room})
         
         # Fetch all the bookings on the specified room
         bookings_query = Booking.objects.filter(room__id=room_id)

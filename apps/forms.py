@@ -10,22 +10,6 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = ['client', 'room']
-    
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('current_user', None)
-        
-        super(BookingForm, self).__init__(*args, **kwargs)
-        
-        if not user: return
-        
-        client_query = Client.objects.all()
-        include_id = []
-        
-        for client in client_query:
-            if user.id in client.users.all().values_list('id', flat=True):
-                include_id.append(client.pk)
-                
-        self.fields['client'].queryset = client_query.filter(id__in=include_id)
         
     # Override
     def clean_client(self):

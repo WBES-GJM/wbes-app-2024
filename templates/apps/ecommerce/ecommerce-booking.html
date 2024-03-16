@@ -392,7 +392,7 @@
         for (const bk of fetchBookings) {
             bk.start = formatDate(bk.start);
             bk.end = formatDate(bk.end);
-            bk.allDay = true;
+            bk.allDay = false;
             BOOKINGS.push(bk);
         }
 
@@ -521,14 +521,22 @@
     function initDateTimeInputs() {
         $('#newbooking-start-date-input').on('change', function () {
             $('#newbooking-end-date-input').attr('min', this.value);
-            if (!$('#newbooking-end-date-input').val()){
-                $('#newbooking-end-date-input').val(this.value);
+            if ($('#newbooking-end-date-input').val() < $('#newbooking-start-date-input').val()){
+                $('#newbooking-end-date-input').val(null);
+                setTimeOptions(true);
+            } else if ($('#newbooking-end-date-input').val() === $('#newbooking-start-date-input').val()) {
+                setTimeOptions(true);
+            } else {
+                setTimeOptions();
             }
-            setTimeOptions();
         });
     
         $('#newbooking-end-date-input').on('change', function () {
-            setTimeOptions();
+            if ($('#newbooking-end-date-input').val() === $('#newbooking-start-date-input').val()) {
+                setTimeOptions(true);
+            } else {
+                setTimeOptions();
+            }
         })
     
         $('#newbooking-start-time-input').on('change', function () {
@@ -540,7 +548,10 @@
         const startTime = parseInt($('#newbooking-start-time-input').val());
 
         if (startTimeOnchangeBool) {
-            $('#newbooking-end-time-input').val(`${startTime+1}`);
+            if ($('#newbooking-end-date-input').val() === $('#newbooking-start-date-input').val()
+                && $('#newbooking-end-time-input').val() <= $('#newbooking-start-time-input').val()) {
+                $('#newbooking-end-time-input').val(`${startTime+1}`);
+            }
         }
 
         if ($('#newbooking-start-date-input').val() === $('#newbooking-end-date-input').val()) {

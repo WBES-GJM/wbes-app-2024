@@ -25,11 +25,11 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                                <h4 class="mb-sm-0 font-size-18">Employees</h4>
+                                <h4 class="mb-sm-0 font-size-18">Company Employees</h4>
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Users</a></li>
+                                        <li class="breadcrumb-item">Accounts</li>
                                         <li class="breadcrumb-item active">Employees</li>
                                     </ol>
                                 </div>
@@ -46,7 +46,7 @@
                                     <div class="row align-items-center">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <h5 class="card-title">Employee List <span class="text-muted fw-normal ms-2">(834)</span></h5>
+                                                <h5 class="card-title">Employee List <span class="text-muted fw-normal ms-2">({{ list|length }})</span></h5>
                                             </div>
                                         </div>
             
@@ -95,6 +95,7 @@
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">Position</th>
+                                                <th scope="col">Company</th>
                                                 <th scope="col">Email</th>
                                                 <th scope="col">Tags</th>
                                                 <th style="width: 80px; min-width: 80px;">Action</th>
@@ -115,13 +116,14 @@
                                                                 <i class="bx bxs-user-circle"></i>
                                                             </div>
                                                         </div>
-                                                        <a href="{% url 'apps:users.profile' profile emp.id %}" class="text-body">{{emp.first_name_employee}} {{emp.last_name_employee}}</a>
+                                                        <a href="{% url 'apps:accounts.profile' profile emp.id %}" class="text-body">{{emp.name_prefix_employee}} {{emp.first_name_employee}} {{emp.middle_name_employee}} {{emp.last_name_employee}}</a>
                                                     </td>
                                                     <!-- <td>
                                                         <img src="{% static 'images/users/avatar-6.jpg'%}" alt="" class="avatar-sm rounded-circle me-2">
                                                         <a href="#" class="text-body">Tommy Hayes</a>
                                                     </td> -->
                                                     <td>{{emp.job_title_employee}}</td>
+                                                    <td>{{emp.company}}</td>
                                                     <td>{{emp.user.email}}</td>
                                                     <td>
                                                         <div class="d-flex gap-2">

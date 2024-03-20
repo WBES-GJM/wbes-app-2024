@@ -25,12 +25,12 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                                <h4 class="mb-sm-0 font-size-18">Employees</h4>
+                                <h4 class="mb-sm-0 font-size-18">Clients</h4>
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Users</a></li>
-                                        <li class="breadcrumb-item active">Employees</li>
+                                        <li class="breadcrumb-item">Accounts</li>
+                                        <li class="breadcrumb-item active">Clients</li>
                                     </ol>
                                 </div>
 
@@ -46,7 +46,7 @@
                                     <div class="row align-items-center">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <h5 class="card-title">Employee List <span class="text-muted fw-normal ms-2">(834)</span></h5>
+                                                <h5 class="card-title">Client List <span class="text-muted fw-normal ms-2">({{ list|length }})</span></h5>
                                             </div>
                                         </div>
             
@@ -94,19 +94,21 @@
                                                     </div>
                                                 </th>
                                                 <th scope="col">Name</th>
-                                                <th scope="col">Position</th>
+                                                <th scope="col">Owner</th>
+                                                <th scope="col">Employee</th>
+                                                <th scope="col">Virtual</th>
+                                                <th scope="col">Phone</th>
                                                 <th scope="col">Email</th>
-                                                <th scope="col">Tags</th>
                                                 <th style="width: 80px; min-width: 80px;">Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                                {% for emp in employees %}
+                                                {% for client in list %}
                                                 <tr>
                                                     <th scope="row">
                                                         <div class="form-check font-size-16">
-                                                            <input type="checkbox" class="form-check-input" id="contacusercheck{{emp.id}}">
-                                                            <label class="form-check-label" for="contacusercheck{{emp.id}}"></label>
+                                                            <input type="checkbox" class="form-check-input" id="contacusercheck{{client.id}}">
+                                                            <label class="form-check-label" for="contacusercheck{{client.id}}"></label>
                                                         </div>
                                                     </th>
                                                     <td>
@@ -115,21 +117,32 @@
                                                                 <i class="bx bxs-user-circle"></i>
                                                             </div>
                                                         </div>
-                                                        <a href="{% url 'apps:users.employee' id=emp.id %}" class="text-body">{{emp.first_name_employee}} {{emp.last_name_employee}}</a>
+                                                        <a href="{% url 'apps:accounts.profile' profile client.id %}" class="text-body">{{client.name}}</a>
                                                     </td>
                                                     <!-- <td>
                                                         <img src="{% static 'images/users/avatar-6.jpg'%}" alt="" class="avatar-sm rounded-circle me-2">
                                                         <a href="#" class="text-body">Tommy Hayes</a>
                                                     </td> -->
-                                                    <td>{{emp.job_title_employee}}</td>
-                                                    <td>{{emp.user.email}}</td>
+
+                                                    <!-- Owner -->
+                                                    <td>{{client.owner.owner}}</td>
+
+                                                    <!-- Employee -->
+                                                    <td>{{client.employee.employee}}</td>
+
+                                                    <!-- Virtual -->
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <a href="#" class="badge bg-primary-subtle text-primary font-size-11">sample</a>
-                                                            <a href="#" class="badge bg-primary-subtle text-primary font-size-11">tags</a>
-                                                            <a href="#" class="badge bg-primary-subtle text-primary font-size-11">2+ more</a>
+                                                            <a href="#" class="badge bg-primary-subtle text-primary font-size-11">{{client.virtual.package}}</a>
                                                         </div>
                                                     </td>
+
+                                                    <!-- Phone -->
+                                                    <td>{{client.list_of_phone}}</td>
+
+                                                    <!-- Email -->
+                                                    <td>{{client.list_of_email}}</td>
+
                                                     <td>
                                                         <div class="dropdown">
                                                             <button class="btn btn-link font-size-16 shadow-none py-0 text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">

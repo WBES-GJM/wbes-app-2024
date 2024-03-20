@@ -63,6 +63,8 @@ class Command(BaseCommand):
     def _create_test_data(self):
         """Create test users and their related objects."""
 
+        replace_all_data = False
+
         for m, d  in self.TEST_DATA.items():
             model: models.Model = m
             data: List[Dict] = d
@@ -70,7 +72,7 @@ class Command(BaseCommand):
             replace_all = False
 
             for obj_dict in data:
-                
+
                 new_obj: models.Model = model()
                 save = True
                 with_id = False
@@ -79,21 +81,21 @@ class Command(BaseCommand):
                     if not model._meta.get_field(fname):
                         continue
                     with_id = fname == 'id' or with_id
-                    
+
                     if fname == 'user':
                         value = User.objects.get(username=value)
                     elif fname == 'employee':
                         name = value.split('-')
                         value = Employee.objects.get(
-                            last_name_employee=name[0], 
-                            middle_name_employee=name[1], 
+                            last_name_employee=name[0],
+                            middle_name_employee=name[1],
                             first_name_employee=name[2]
                         )
                     elif fname == 'owner':
                         name = value.split('-')
                         value = Owner.objects.get(
-                            last_name_owner=name[0], 
-                            middle_name_owner=name[1], 
+                            last_name_owner=name[0],
+                            middle_name_owner=name[1],
                             first_name_owner=name[2]
                         )
                     elif fname == 'client':
@@ -108,9 +110,9 @@ class Command(BaseCommand):
                     elif fname == 'virtual':
                         value = Virtual.objects.get(package=value)
                     setattr(new_obj, fname, value)
-                    print(f'Added new {model._meta.model_name}' )
-                        
-                if replace_all or not with_id:
+                print(f'Added new {model._meta.model_name}' )
+
+                if replace_all_data or replace_all or not with_id:
                     new_obj.save()
                     continue
 
@@ -124,6 +126,9 @@ class Command(BaseCommand):
                         break
                     elif ans ==  'i' or ans == 'ignore':
                         save = False
+                        break
+                    elif ans == 'rad':
+                        replace_all_data = True
                         break
 
                 if save:
@@ -144,6 +149,8 @@ class Command(BaseCommand):
     def _duplicate_ask(self, new_obj: models.Model) -> bool:
         model = new_obj._meta.model
         ans = input('Duplicate object with the same name found in model: ' + model._meta.model_name \
-                        + '.\nWhat would you like to do for this record? '\
-                        + '[replace/ignore - r/i] (or if you want to replace all duplicates, enter [ra]): ')
+            + '.\nWhat would you like to do for this record? [replace/ignore (r/i)]'\
+            + '\nOr if you want to Replace-All duplicates for this model, enter [ra]'\
+            + '\nOr if you want to Replace-All-Data regardless, enter [rad]\n>> '
+        )
         return ans

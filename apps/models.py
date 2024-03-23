@@ -17,7 +17,7 @@ from django.utils.text import slugify
 
 
 class Contract(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     contractee = models.CharField(max_length=200)
     service = models.ForeignKey('Service', on_delete=models.CASCADE, related_name="service")
@@ -25,61 +25,61 @@ class Contract(models.Model):
     end_date = models.CharField(max_length=200)
 
 class Service(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     virtual = models.ForeignKey('Virtual', on_delete=models.CASCADE)
-    hanging_license = models.ForeignKey('HangingLicense', on_delete=models.CASCADE) 
+    hanging_license = models.ForeignKey('HangingLicense', on_delete=models.CASCADE)
     mail_forwarding = models.ForeignKey('MailForwarding', on_delete=models.CASCADE)
     mail_box = models.ForeignKey('MailBoxService', on_delete=models.CASCADE)
     copy_services = models.ForeignKey('CopyServices', on_delete=models.CASCADE)
 
 class Mailbox(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # Other mailbox properties
 
 class Mail(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mailbox = models.ForeignKey(Mailbox, on_delete=models.CASCADE)
     # Other mail properties
 
 class Note(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mailbox = models.ForeignKey(Mailbox, on_delete=models.CASCADE)
     # Other note properties
 
 class Gift(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mailbox = models.ForeignKey(Mailbox, on_delete=models.CASCADE)
     # Other gift properties
 
 class Package(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mailbox = models.ForeignKey(Mailbox, on_delete=models.CASCADE)
     # Other package properties
 
 class MailForwarding(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mailbox_number = models.ForeignKey('MailBoxService', on_delete=models.CASCADE)
 
 class MailBoxService(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    company_name = models.ForeignKey('Company', on_delete=models.CASCADE, related_name="company_name") 
-    owner_name = models.ForeignKey('Owner', on_delete=models.CASCADE) 
-    additional_name = models.CharField(max_length=200)    
+    company_name = models.ForeignKey('Company', on_delete=models.CASCADE, related_name="company_name")
+    owner_name = models.ForeignKey('Owner', on_delete=models.CASCADE)
+    additional_name = models.CharField(max_length=200)
     eMail = models.EmailField(max_length=40, null=True)
     additional_email_address = models.EmailField(max_length=40, null=True)
     additional_company = models.CharField(max_length=200, null=True, blank=True)
-    office = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="office")	
+    office = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="office")
     mail_box_number = models.CharField(max_length=200, unique=True)
     mail_forwarding = models.BooleanField(default=False)
-    existing_mail = models.BooleanField(default=False) 
+    existing_mail = models.BooleanField(default=False)
     new_mail = models.BooleanField(default=False)
     existing_package = models.BooleanField(default=False)
     new_package = models.BooleanField(default=False)
@@ -92,18 +92,18 @@ class MailBoxService(models.Model):
         return f"Mailbox: {self.mail_box_number} and {self.additional_name} " \
             + f"with company:{self.company_name }\n owner: {self.owner_name}"
 
-class CopyServices(models.Model): 
-    
+class CopyServices(models.Model):
+
     QUALITY = [('standard', 'Standard'), ('premium', 'Premium'), ('specialty', 'Specialty')]
     COLOR = [('full_color', 'Full Color'), ('black_and_white', 'Black and White'), ('grayscale', 'Grayscale')]
     BINDING = [('stapled', 'Stapled'), ('spiral_bound', 'Spiral Bound'), ('booklet', 'Booklet')]
     ORDER_STATUS = [('processing', 'Processing'), ('completed', 'Completed'), ('shipped', 'Shipped'), ('Received', 'Received')]
     SIZE = [('8-1/2 x 11', 'Standard Letter 8-1/2 x 11'), ('8-1/2 x 14', 'Standard Legal 8-1/2 x 14'), ('11 x 17', '11 x 17')]
-    DELIVERY = [('mailbox', 'Mailbox'), ('office', 'Office'), ('pickup_at_reception', 'Pickup at Reception'), 
+    DELIVERY = [('mailbox', 'Mailbox'), ('office', 'Office'), ('pickup_at_reception', 'Pickup at Reception'),
                 ('local_delivery', 'Local Delivery')]
     CODE = [('happy', 'Happy'), ('truth', 'Truth'), ('smile', 'Smile'), ('good', 'Good'), ('enjoy', 'Enjoy')]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     price = models.DecimalField(max_digits=8, decimal_places=2)
     price_type = models.CharField(max_length=20, choices=QUALITY)
     paper_size = models.CharField(max_length=20, choices=SIZE)
@@ -132,12 +132,12 @@ class CopyServices(models.Model):
 
     def __str__(self):
         return f"Copy Services by {self.user.username}({self.quantity} copies total price - {self.total_price})"
-    
+
     def total_cost(self):
         return self.price * self.quantity
 
 class Location(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     street_number = models.CharField(max_length=20, null=True)  # Field for street number
@@ -158,7 +158,7 @@ class Location(models.Model):
         return f"{self.name }\n{self.street_number} {self.street_name} \n{self.city}, {self.state}   {self.zip}"
 
 # class Lease(models.Model):
-#     
+#
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)
 #     lessee = models.CharField(max_length=300)
 #     company = models.ForeignKey('Company', on_delete=models.CASCADE)
@@ -168,16 +168,16 @@ class Location(models.Model):
 #     access_card = models.ForeignKey('AccessCard', on_delete=models.CASCADE)
 #     rent = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="lease_rent")
 #     payment_period = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="payment_period_lease")
-#     term_lease = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="term")  
+#     term_lease = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="term")
 #     lease_price_office = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="lease_price")
 #     start_date = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="start_date")
 #     end_date = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="end_date")
 #     sign_date = models.ForeignKey('Office', on_delete=models.CASCADE, related_name="sign_date")
-#     contract_file = models.FileField(upload_to='contracts/')  
+#     contract_file = models.FileField(upload_to='contracts/')
 
 #     def get_lessee(self):
 #         return f"{self.company}\n{self.owner}"
-    
+
 #     def calculate_duration(self):
 #         if self.start_date is None or self.end_date is None:
 #             return None
@@ -200,7 +200,7 @@ class Suite(models.Model):
     SUITE_NUMBER = [
         ('100', '100'), ('110', '110')
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     building = models.ForeignKey(Location, on_delete=models.CASCADE, default="Unknown Building Identifier")
     suite_number = models.CharField(max_length=10, choices=SUITE_NUMBER)
@@ -217,28 +217,28 @@ class Office(models.Model):
     ]
 
     OFFICE_CHOICES = [
-        ('K1', 'K1'), ('K2', 'K2'), ('K3', 'K3'), ('K4', 'K4'), ('K5', 'K5'), ('K6', 'K6'), ('K7', 'K7'), 
-        ('K8', 'K8'), ('K9', 'K9'), ('K10', 'K10'), ('K11', 'K11'), ('K12', 'K12'), ('K13', 'K13'), 
-        ('K14', 'K14'), ('S1a', 'S1a'), ('S1b', 'S1b'), ('S2', 'S2'), ('S3', 'S3'), ('S4', 'S4'),        
+        ('K1', 'K1'), ('K2', 'K2'), ('K3', 'K3'), ('K4', 'K4'), ('K5', 'K5'), ('K6', 'K6'), ('K7', 'K7'),
+        ('K8', 'K8'), ('K9', 'K9'), ('K10', 'K10'), ('K11', 'K11'), ('K12', 'K12'), ('K13', 'K13'),
+        ('K14', 'K14'), ('S1a', 'S1a'), ('S1b', 'S1b'), ('S2', 'S2'), ('S3', 'S3'), ('S4', 'S4'),
         ('S5', 'S5'), ('S6', 'S6'), ('S7', 'S7'), ('S8', 'S8'), ('S9', 'S9'), ('S10', 'S10'),
-        ('S11', 'S11'), ('S12', 'S12'), ('S13', 'S13'), ('S14', 'S14'), ('S15', 'S15'), ('S16', 'S16') 
+        ('S11', 'S11'), ('S12', 'S12'), ('S13', 'S13'), ('S14', 'S14'), ('S15', 'S15'), ('S16', 'S16')
     ]
     SCENARIOS = [
-        ('one tenant lease', 'one tenant lease'), ('Joint Tenancy','Joint Tenancy'), ('Subletting','Subletting'), 
-        ('Separate Leases','Separate Leases'), ('Cotenancy','Cotenancy'), 
+        ('one tenant lease', 'one tenant lease'), ('Joint Tenancy','Joint Tenancy'), ('Subletting','Subletting'),
+        ('Separate Leases','Separate Leases'), ('Cotenancy','Cotenancy'),
         ('Room Rental Agreement','Room Rental Agreement')
     ]
     AMENITIES = [
-        ('phone','phone'), ('fax','fax'), ('TV','TV'), ('Computer','Computer'), ('Projector','Projector'), 
-        ('Secretary','Secretary'), ('Additonal Space','Additional Space'), ('storage','storage'), 
+        ('phone','phone'), ('fax','fax'), ('TV','TV'), ('Computer','Computer'), ('Projector','Projector'),
+        ('Secretary','Secretary'), ('Additonal Space','Additional Space'), ('storage','storage'),
         ('assistant','assistant'), ('extra chair','extra chair'),
     ]
     PERIOD = [
-        ('setup fee', 'setup fee'), ('one time fee', 'one time fee'), ('one time charge', 'one time charge'), ('hourly','hourly'), 
-        ('daily','daily'), ('weekly','weekly'), ('monthly','monthly'), ('semi-annually', 'semi-annually'), ('annually','annually') 
+        ('setup fee', 'setup fee'), ('one time fee', 'one time fee'), ('one time charge', 'one time charge'), ('hourly','hourly'),
+        ('daily','daily'), ('weekly','weekly'), ('monthly','monthly'), ('semi-annually', 'semi-annually'), ('annually','annually')
     ]
-    TERM = [('6 months', '6'), ('1 year', '1')] 
-    
+    TERM = [('6 months', '6'), ('1 year', '1')]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     market_price_per_sq_ft = models.DecimalField(max_digits=20, decimal_places=2)
     price_per_sq_ft = models.DecimalField(max_digits=20, decimal_places=2)
@@ -247,7 +247,7 @@ class Office(models.Model):
     payment_period = models.CharField(max_length=17, choices=PERIOD)
     default_free_hours = models.PositiveIntegerField(default=4)
     free_hours = models.PositiveIntegerField(help_text="carry over hours")
-    term_lease = models.PositiveIntegerField(help_text="number of payments") 
+    term_lease = models.PositiveIntegerField(help_text="number of payments")
     lease_price_office = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     contract_file = models.FileField(upload_to='contracts/')
     start_date = models.DateTimeField(auto_now_add=True)
@@ -271,12 +271,12 @@ class Office(models.Model):
 
     def __str__(self):
         return f"{self.office_number} is rented until {self.end_date}"
-    
+
 class Virtual(models.Model):
     PACKAGE = [
         ('Gold', 'Gold'), ('Silver', 'Silver'), ('Bronze', 'Bronze')
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     package = models.CharField(max_length=7, choices=PACKAGE)
 
@@ -285,14 +285,14 @@ class Virtual(models.Model):
         # return f"{self.user} is a {self.package} virtual customer"
 
 class Company(models.Model):
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.CharField(max_length=200, null=True)
     street_number_company = models.CharField(max_length=20, null=True)
     street_name_company = models.CharField(max_length=200, null=True)
-    city_company = models.CharField(max_length=100, null=True)   
-    state_company = models.CharField(max_length=100, null=True)  
-    zip_company = models.CharField(max_length=20, null=True)     
+    city_company = models.CharField(max_length=100, null=True)
+    state_company = models.CharField(max_length=100, null=True)
+    zip_company = models.CharField(max_length=20, null=True)
     address_company = models.CharField(max_length=200, null=True, blank=True)
     main_phone_company = models.CharField(max_length=20, null=True)
     home_phone_company = models.CharField(max_length=20, null=True)
@@ -309,7 +309,7 @@ class Company(models.Model):
     linkedin_company = models.CharField(max_length=100, blank=True, null=True)
     facebook_company = models.CharField(max_length=100, blank=True, null=True)
     x_company = models.CharField(max_length=100, blank=True, null=True)
-    URL1_company = models.CharField(max_length=100, blank=True, null=True) 
+    URL1_company = models.CharField(max_length=100, blank=True, null=True)
     URL2_company = models.CharField(max_length=50, blank=True, null=True)
     URL3_company = models.CharField(max_length=50, blank=True, null=True)
     URL4_company = models.CharField(max_length=50, blank=True, null=True)
@@ -326,18 +326,18 @@ class Company(models.Model):
         # Remove duplicates from phone and email lists
         phones = [
             phone.strip() for phone in [
-                self.main_phone_company, 
-                self.alt_phone_company, 
-                self.alt_mobile_company, 
-                self.home_phone_company, 
+                self.main_phone_company,
+                self.alt_phone_company,
+                self.alt_mobile_company,
+                self.home_phone_company,
                 self.cell_company
             ] if phone is not None and phone.strip()
         ]
         emails = [
             email.strip() for email in [
-                self.alt_email_2_company, 
-                self.alt_email_1_company, 
-                self.cc_email_company, 
+                self.alt_email_2_company,
+                self.alt_email_1_company,
+                self.cc_email_company,
                 self.main_email_company
             ] if email is not None and email.strip()
         ]
@@ -365,7 +365,7 @@ class Owner(models.Model):
         ('Dr.', 'Dr.'),
         ('Ms.', 'Ms.')
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     name_prefix_owner = models.CharField(max_length=30, choices=NAME_PREFIX, null=True)
@@ -373,11 +373,11 @@ class Owner(models.Model):
     middle_name_owner = models.CharField(max_length=200, null=True)
     first_name_owner = models.CharField(max_length=200, null=True)
     owner = models.CharField(max_length=200, null=True, blank=True)
-    street_number_owner = models.CharField(max_length=20, blank=True, null=True) 
-    street_name_owner = models.CharField(max_length=200, blank=True, null=True) 
-    city_owner = models.CharField(max_length=100, blank=True, null=True)    
-    state_owner = models.CharField(max_length=100, blank=True, null=True)   
-    zip_owner = models.CharField(max_length=20, blank=True, null=True)      
+    street_number_owner = models.CharField(max_length=20, blank=True, null=True)
+    street_name_owner = models.CharField(max_length=200, blank=True, null=True)
+    city_owner = models.CharField(max_length=100, blank=True, null=True)
+    state_owner = models.CharField(max_length=100, blank=True, null=True)
+    zip_owner = models.CharField(max_length=20, blank=True, null=True)
     home_address_owner = models.CharField(max_length=200, null=True, blank=True)
     main_phone_owner = models.CharField(max_length=20, blank=True, null=True)
     home_phone_owner = models.CharField(max_length=20, blank=True, null=True)
@@ -394,7 +394,7 @@ class Owner(models.Model):
     linkedin_owner = models.CharField(max_length=100, blank=True, null=True)
     facebook_owner = models.CharField(max_length=100, blank=True, null=True)
     x_owner = models.CharField(max_length=100, blank=True, null=True)
-    URL1_owner = models.CharField(max_length=100, blank=True, null=True) 
+    URL1_owner = models.CharField(max_length=100, blank=True, null=True)
     URL2_owner = models.CharField(max_length=50, blank=True, null=True)
     URL3_owner = models.CharField(max_length=50, blank=True, null=True)
     URL4_owner = models.CharField(max_length=50, blank=True, null=True)
@@ -409,7 +409,7 @@ class Owner(models.Model):
         # Remove duplicates from phone and email lists
         phones = [
             phone.strip() for phone in [
-                self.main_phone_owner, 
+                self.main_phone_owner,
                 self.alt_phone_owner,
                 self.alt_mobile_owner,
                 self.home_phone_owner,
@@ -419,7 +419,7 @@ class Owner(models.Model):
         emails = [
             email.strip() for email in [
                 self.alt_email_2_owner,
-                self.alt_email_1_owner, 
+                self.alt_email_1_owner,
                 self.cc_email_owner,
                 self.main_email_owner
             ] if email is not None and email.strip()
@@ -449,7 +449,7 @@ class Employee(models.Model):
         ('Dr.', 'Dr.'),
         ('Ms.', 'Ms.')
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     name_prefix_employee = models.CharField(max_length=30, choices=NAME_PREFIX, null=True)
@@ -458,11 +458,11 @@ class Employee(models.Model):
     first_name_employee = models.CharField(max_length=200, null=True)
     job_title_employee = models.CharField(max_length=200, null=True)
     employee = models.CharField(max_length=300, null=True, blank=True)
-    street_number_employee = models.CharField(max_length=20, blank=True, null=True)     
-    street_name_employee = models.CharField(max_length=200, blank=True, null=True)      
-    city_employee = models.CharField(max_length=100, blank=True, null=True)             
-    state_employee = models.CharField(max_length=100, blank=True, null=True)            
-    zip_employee = models.CharField(max_length=20, blank=True, null=True)               
+    street_number_employee = models.CharField(max_length=20, blank=True, null=True)
+    street_name_employee = models.CharField(max_length=200, blank=True, null=True)
+    city_employee = models.CharField(max_length=100, blank=True, null=True)
+    state_employee = models.CharField(max_length=100, blank=True, null=True)
+    zip_employee = models.CharField(max_length=20, blank=True, null=True)
     address_employee = models.CharField(max_length=200, blank=True, null=True)
     main_phone_employee = models.CharField(max_length=20, blank=True, null=True)
     home_phone_employee = models.CharField(max_length=20, blank=True, null=True)
@@ -479,7 +479,7 @@ class Employee(models.Model):
     linkedin_employee = models.CharField(max_length=100, blank=True, null=True)
     facebook_employee = models.CharField(max_length=100, blank=True, null=True)
     x_employee = models.CharField(max_length=100, blank=True, null=True)
-    URL1_employee = models.CharField(max_length=100, blank=True, null=True) 
+    URL1_employee = models.CharField(max_length=100, blank=True, null=True)
     URL2_employee = models.CharField(max_length=50, blank=True, null=True)
     URL3_employee = models.CharField(max_length=50, blank=True, null=True)
     URL4_employee = models.CharField(max_length=50, blank=True, null=True)
@@ -518,7 +518,7 @@ class AccessCard(models.Model):
     CODE = [('happy', 'Happy'), ('truth', 'Truth'), ('smile', 'Smile'), ('good', 'Good'), ('enjoy', 'Enjoy')]
     REFERENCE = [('OR#F45k556', 'OR#F45k556'), ('OR#gG45k556', 'OR#gG45k556'), ('OR#F77k556', 'OR#F77k556'), ('OR#F45fg56', 'OR#F45fg56'), ('OR#Fhhh556', 'OR#Fhhh556')]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=8, decimal_places=2, default="60.00")
     payment_received = models.BooleanField(default=False)
@@ -539,10 +539,10 @@ class AccessCard(models.Model):
 
     def __str__(self):
         return f"{self.quantity} Access Card(s), Card No: {self.card_number}, issued to {self.employee} at a total price of {self.total_price}"
-    
+
     def total_cost(self):
         return self.price * self.quantity
-    
+
 
 class Client(models.Model):
     DEFAULT_HOURLY_RATE = [('35', '$35.00')]
@@ -566,8 +566,8 @@ class Client(models.Model):
         ]
         emails = [
             email.strip() for email in '\n'.join([
-                self.employee.list_of_email, 
-                self.owner.list_of_email, 
+                self.employee.list_of_email,
+                self.owner.list_of_email,
                 self.company.list_of_email
             ]).split('\n') if email.strip()
         ]
@@ -584,7 +584,7 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def display_text(self) -> str:
         return f"name: {self.name} employee: {self.employee} owner: {self.owner} company: {self.company}"
 
@@ -627,20 +627,20 @@ class ConferenceRoom(models.Model):
     building = models.ForeignKey(Building, on_delete=models.CASCADE)
     max_capacity = models.PositiveIntegerField(default=12)
     seating_capacity = models.PositiveIntegerField(default=10)
-    
+
     # Other room-related field
     def __str__(self):
         return f"{self.name} with max capacity of {self.max_capacity} and seating capacity of {self.seating_capacity}"
 
 class Booking(models.Model):
-        
+
     BUSINESS_HOURS = {
         'start': 8,
         'end': 22,
     }
-    
+
     MAX_DURATION = BUSINESS_HOURS['end'] - BUSINESS_HOURS['start']
-    
+
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     room = models.ForeignKey(ConferenceRoom, on_delete=models.CASCADE)
     start_datetime = models.DateTimeField(blank=True)
@@ -657,7 +657,7 @@ class Booking(models.Model):
             hours_from_days = difference.days * 24
             hours_from_seconds = difference.seconds//3600
             self.duration_hours = hours_from_days + hours_from_seconds
-            
+
         # Generate a "mashup" confirmation number
         # name_slug = slugify(self.client.name)
         # room_slug = slugify(self.room.room)
@@ -666,67 +666,67 @@ class Booking(models.Model):
         datetime_format = "%Y%m%d%H"
         formatted_datetimes = self.start_datetime.strftime(datetime_format)+self.end_datetime.strftime(datetime_format)
         self.confirmation = f"{self.room.pk:05d}{formatted_datetimes}"
-        
+
         super(Booking, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.client.name} has scheduled the {self.room} in between {self.start_datetime} and {self.end_datetime}"
-    
-    
+
+
 class HangingLicense(models.Model):
     name = models.CharField(max_length=120)
 
 # class AdditionalCompany(models.Model):
-#     
+#
 
 # class Receptionist(models.Model):
-#     
+#
 
 # class Address(models.Model):
-#     
+#
 
 # class PhoneNumber(models.Model):
-#     
+#
 
 # class Phone(models.Model):
-#     
+#
 
 # class Fax(models.Model):
-#     
+#
 
 # class Projector(models.Model):
-#     
+#
 
 # class Scanner(models.Model):
-#     
+#
 
 # class Chair(models.Model):
-#     
+#
 
 # class RefreshmentsService(models.Model):
-#     
+#
 
 # class CableTV(models.Model):
-#     
+#
 
 # class EngravedDirectorySign(models.Model):
-#     
+#
 
 # class EngravedMailSign(models.Model):
-#     
+#
 
 # class Keys(models.Model):
-#     
+#
 
 # class LeaseAgreement(models.Model):
-#     
-    
+#
+
 # class RentalService(models.Model):
-#     
+#
 
 # class Billing(models.Model):
-#     
+#
 
 # class Reports(models.Model):
-#     
+#
 

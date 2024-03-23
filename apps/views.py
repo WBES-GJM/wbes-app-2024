@@ -327,19 +327,19 @@ apps_booking_calendar_view = EcommerceBookingView.as_view()
 class UserView(LoginRequiredMixin, TemplateView):
 
     profile_model_templates = {
-        'user': (User, "apps/users/apps-users-profile-user.html"),
-        'client': (Client, "apps/users/apps-users-profile-client.html"),
-        'company': (Company, "apps/users/apps-users-profile-company.html"),
-        'owner': (Owner, "apps/users/apps-users-profile-owner.html"),
-        'employee': (Employee, "apps/users/apps-users-profile-employee.html"),
+        'user': (User, "apps/profiles/apps-users-profile-user.html"),
+        'client': (Client, "apps/profiles/apps-users-profile-client.html"),
+        'company': (Company, "apps/profiles/apps-users-profile-company.html"),
+        'owner': (Owner, "apps/profiles/apps-users-profile-owner.html"),
+        'employee': (Employee, "apps/profiles/apps-users-profile-employee.html"),
     }
 
     list_model_templates = {
-        'user': (User, "apps/users/apps-users-list-user.html"),
-        'client': (Client, "apps/users/apps-users-list-client.html"),
-        'company': (Company, "apps/users/apps-users-list-company.html"),
-        'owner': (Owner, "apps/users/apps-users-list-owner.html"),
-        'employee': (Employee, "apps/users/apps-users-list-employee.html"),
+        'user': (User, "apps/profiles/apps-users-list-user.html"),
+        'client': (Client, "apps/profiles/apps-users-list-client.html"),
+        'company': (Company, "apps/profiles/apps-users-list-company.html"),
+        'owner': (Owner, "apps/profiles/apps-users-list-owner.html"),
+        'employee': (Employee, "apps/profiles/apps-users-list-employee.html"),
     }
 
 

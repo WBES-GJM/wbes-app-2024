@@ -1,0 +1,47 @@
+{% load static %}
+
+<div class="modal fade bs-example-modal-lg" id="profileFormStaticBackdrop" data-bs-backdrop="static"
+    data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="myProfileFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myLargeModalLabel">{{ form_title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if form_obj_id %}
+                <form id="profileForm" method="post" action="{% url form_url profile form_obj_id %}">
+                {% else %}
+                <form id="profileForm" method="post" action="{% url form_url profile %}">
+                {% endif %}
+                {% csrf_token %}
+                {{ form.as_p }}
+            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" form="profileForm">Submit</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- SCRIPT TO HANDLE FORM BEHAVIORS -->
+<script src="{% static 'libs/jquery/dist/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        let errors = $('.errorlist')
+        if (errors.length > 0) {
+            $('button[data-bs-target="#profileFormStaticBackdrop"]').click();
+        }
+    })
+</script>
+
+<!-- SCRIPT & STYLE TO HANDLE STYLING -->
+<style>
+    .errorlist {
+        color: red;
+    }
+</style>
+<script>
+</script>

@@ -1,0 +1,37 @@
+
+To edit BOOKING (Calendar) function:
+    > You may edit the following files
+
+        - templates/apps/ecommerce/ecommerce-booking.html
+            -> This is where you will mostly have changes in terms of the interface
+
+        - static/js/pages/calendar.init.js
+            -> Edit this if you want to change something from the calendar behavior
+
+        - apps/views.py | included class-based views are:
+            - AjaxFunctionsView -> handles all ajax request from ecommerce-booking.html
+            - EcommerceBookingView -> handles the get, post, put (or edit), and delete methods
+
+        - apps/forms.py | included forms are:
+            - BookingForm -> mainly for validating start datetime
+
+
+To edit the PROFILES of Client, Company, Owner, Employee and User:
+    > You may edit the following files
+
+        - templates/apps/profiles/
+            -> Each has their own list and profile pages
+
+        - templates/apps/profiles/profile-form.html
+            -> Form for new records and editing records
+
+        - apps/views.py | included class-based views are:
+            - UserView 
+                -> handles the get and post requests (post is also used when edit is submitted)
+                -> since the profiles essentially have the same logic, condensed into one "UserView"
+
+        - apps/forms.py | included forms are:
+            - BaseProfileForm 
+                -> the main form that has an overriden save method
+                -> inherited by the forms: ClientForm, CompanyForm, OwnerForm, EmployeeForm
+            - NewUserForm & EditUserForm -> for actual user accounts

@@ -42,8 +42,8 @@ urlpatterns = [
     
     #  ----------------------- PROFILES -----------------------
     # path("users/myprofile", view=apps_users_myprofile_view, name="users.myprofile"),
-    path("accounts/<str:profile>", view=apps_users_view, name="accounts.list"),
-    path("accounts/<str:profile>/<int:id>", view=apps_users_view, name="accounts.profile"),
+    path("profiles/<str:profile>", view=apps_users_view, name="profiles.list"),
+    path("profiles/<str:profile>/<int:id>", view=apps_users_view, name="profiles.profile"),
     # ---------------------------------------------------------
     
     path(

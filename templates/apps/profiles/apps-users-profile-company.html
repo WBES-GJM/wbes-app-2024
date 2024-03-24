@@ -3,236 +3,252 @@
 {% load static %}
 {% block title %}Profile{% endblock title %}
 {% block content %}
-        <!-- ============================================================== -->
-        <!-- Start right Content here -->
-        <!-- ============================================================== -->
-        <div class="main-content">
 
-            <div class="page-content">
-                <div class="container-fluid">
+    <!-- Form -->
+    {% include 'apps/profiles/profile-form.html' %}
 
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="profile-user"></div>
-                        </div>
+    <!-- ============================================================== -->
+    <!-- Start right Content here -->
+    <!-- ============================================================== -->
+    <div class="main-content">
+
+        <div class="page-content">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="profile-user"></div>
                     </div>
+                </div>
 
-                    <div class="row">
-                        <div class="profile-content">
-                            <div class="row align-items-end">
-                                <div class="col-sm">
-                                    <div class="d-flex align-items-end mt-3 mt-sm-0">
-                                        <div class="flex-shrink-0">
-                                            <div class="avatar-xxl me-3">
-                                                <img src="{% static 'images/users/avatar-3.jpg'%}" alt="" class="img-fluid rounded-circle d-block img-thumbnail">
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div>
-                                                <h5 class="font-size-16 mb-1">{{object.company}}</h5>
-                                                <p class="text-muted font-size-13 mb-2 pb-2">{{object.address_company}}</p>
-                                            </div>
+                <div class="row">
+                    <div class="profile-content">
+                        <div class="row align-items-end">
+                            <div class="col-sm">
+                                <div class="d-flex align-items-end mt-3 mt-sm-0">
+                                    <div class="flex-shrink-0">
+                                        <div class="avatar-xxl me-3">
+                                            <img src="{% static 'images/users/avatar-3.jpg'%}" alt="" class="img-fluid rounded-circle d-block img-thumbnail">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-sm-auto">
-                                    {% comment %}
-                                    <div class="d-flex align-items-start justify-content-end gap-2 mb-2">
-                                        {% if not options.disable_message %}
+                                    <div class="flex-grow-1">
                                         <div>
-                                            <button type="button" class="btn btn-success"><i class="me-1"></i> Message</button>
-                                        </div>
-                                        {% endif %}
-                                        <div>
-                                            <div class="dropdown">
-                                                <button class="btn btn-link font-size-16 shadow-none text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="bx bx-dots-horizontal-rounded font-size-20"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                    <li><a class="dropdown-item" href="#">Action</a></li>
-                                                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                                </ul>
-                                            </div>
+                                            <h5 class="font-size-16 mb-1">{{object.company}}</h5>
+                                            <p class="text-muted font-size-13 mb-2 pb-2">{{object.address_company}}</p>
                                         </div>
                                     </div>
-                                    {% endcomment %}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {% comment %}
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="card bg-transparent shadow-none">
-                                <div class="card-body">
-                                    <ul class="nav nav-tabs-custom card-header-tabs border-top mt-2" id="pills-tab" role="tablist">
-                                        <li class="nav-item">
-                                            <a class="nav-link px-3 active" data-bs-toggle="tab" href="#overview" role="tab">Overview</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link px-3" data-bs-toggle="tab" href="#post" role="tab">Post</a>
-                                        </li>
-                                    </ul>
+                            <div class="col-sm-auto">
+                                <!-- Edit button -->
+                                <div>
+                                    <button type="button" class="btn btn-light waves-effect waves-light"
+                                        data-bs-toggle="modal" data-bs-target="#profileFormStaticBackdrop">
+                                        <i class="me-1"></i>
+                                        Edit
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endcomment %}
 
-                    <div class="row mt-4">
-                        <div class="col-xl-8 col-lg-8">
-                            <div class="tab-content">
-                                <div class="tab-pane active" id="overview" role="tabpanel">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="card-title mb-0">Contacts</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div>
-
-                                                <div class="pt-3">
-                                                    <h5 class="font-size-15">Phone Numbers:</h5>
-                                                    <div class="text-muted">
-                                                        <p>
-                                                            {{ object.list_of_phone }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="pt-3">
-                                                    <h5 class="font-size-15">Email Addresses:</h5>
-                                                    <div class="text-muted">
-                                                        <p>
-                                                            {{ object.list_of_email }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- end card body -->
-                                    </div>
-
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="card-title mb-0">Other Contacts</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div>
-        
-                                                <div class="pt-3">
-                                                    <h5 class="font-size-15">Skype ID:</h5>
-                                                    <div class="text-muted">
-                                                        <p>
-                                                            {{ object.skypeid_company }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-        
-                                                <div class="pt-3">
-                                                    <h5 class="font-size-15">Links:</h5>
-                                                    <div class="text-muted">
-                                                        {% if object.URL1_company %}
-                                                        <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
-                                                            {{ object.URL1_company }}
-                                                        </p>
-                                                        {% endif %}
-                                                        {% if object.URL2_company %}
-                                                        <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
-                                                            {{ object.URL2_company }}
-                                                        </p>
-                                                        {% endif %}
-                                                        {% if object.URL3_company %}
-                                                        <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
-                                                            {{ object.URL3_company }}
-                                                        </p>
-                                                        {% endif %}
-                                                        {% if object.URL4_company %}
-                                                        <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
-                                                            {{ object.URL4_company }}
-                                                        </p>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- end card body -->
-                                    </div>
-                                    <!-- end card -->
-                                </div>
-                                <!-- end tab pane -->
-
-                            </div>
-                            <!-- end tab content -->
-                        </div>
-                        <!-- end col -->
-
-                        <div class="col-xl-4 col-lg-4">
-
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">Socials</h5>
-                                </div>
-                                <div class="card-body">
+                                <!--  Message Button -->
+                                {% comment %}
+                                <div class="d-flex align-items-start justify-content-end gap-2 mb-2">
+                                    {% if not options.disable_message %}
                                     <div>
-
-                                        <div class="pt-3">
-                                            <h5 class="font-size-15">Website:</h5>
-                                            <div class="text-muted">
-                                                <p>
-                                                    {{ object.website_company }}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="pt-3">
-                                            <h5 class="font-size-15">Linked In:</h5>
-                                            <div class="text-muted">
-                                                <p>
-                                                    {{ object.linkedin_company }}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="pt-3">
-                                            <h5 class="font-size-15">Facebook:</h5>
-                                            <div class="text-muted">
-                                                <p>
-                                                    {{ object.facebook_company }}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="pt-3">
-                                            <h5 class="font-size-15">X:</h5>
-                                            <div class="text-muted">
-                                                <p>
-                                                    {{ object.facebook_company }}
-                                                </p>
-                                            </div>
+                                        <button type="button" class="btn btn-success"><i class="me-1"></i> Message</button>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-link font-size-16 shadow-none text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bx bx-dots-horizontal-rounded font-size-20"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
-                                <!-- end card body -->
+                                {% endcomment %}
                             </div>
-                            <!-- end card -->
                         </div>
-                        <!-- end col -->
                     </div>
-                    <!-- end row -->
-                    
-                </div> <!-- container-fluid -->
-            </div>
-            <!-- End Page-content -->
+                </div>
 
-            
-        {% block footer %}
-            {% include 'partials/footer.html' %}
-        {% endblock footer %}
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card bg-transparent shadow-none">
+                            <div class="card-body">
+                                <ul class="nav nav-tabs-custom card-header-tabs border-top mt-2" id="pills-tab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link px-3" href="{% url 'apps:profiles.list' profile %}">{{profile|title}} List </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <!-- <a class="nav-link px-3 active" data-bs-toggle="tab" href="#overview" role="tab">Overview</a> -->
+                                        <a class="nav-link px-3 active">{{profile|title}} Profile</a>
+                                    </li>
+                                    <!-- <li class="nav-item">
+                                        <a class="nav-link px-3" data-bs-toggle="tab" href="#post" role="tab">Post</a>
+                                    </li> -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-xl-8 col-lg-8">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="overview" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Contacts</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+
+                                            <div class="pt-3">
+                                                <h5 class="font-size-15">Phone Numbers:</h5>
+                                                <div class="text-muted">
+                                                    <p>
+                                                        {{ object.list_of_phone }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="pt-3">
+                                                <h5 class="font-size-15">Email Addresses:</h5>
+                                                <div class="text-muted">
+                                                    <p>
+                                                        {{ object.list_of_email }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end card body -->
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Other Contacts</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+    
+                                            <div class="pt-3">
+                                                <h5 class="font-size-15">Skype ID:</h5>
+                                                <div class="text-muted">
+                                                    <p>
+                                                        {{ object.skypeid_company }}
+                                                    </p>
+                                                </div>
+                                            </div>
+    
+                                            <div class="pt-3">
+                                                <h5 class="font-size-15">Links:</h5>
+                                                <div class="text-muted">
+                                                    {% if object.URL1_company %}
+                                                    <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
+                                                        {{ object.URL1_company }}
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if object.URL2_company %}
+                                                    <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
+                                                        {{ object.URL2_company }}
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if object.URL3_company %}
+                                                    <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
+                                                        {{ object.URL3_company }}
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if object.URL4_company %}
+                                                    <p><i class="mdi mdi-circle-medium me-1 text-success align-middle"></i>
+                                                        {{ object.URL4_company }}
+                                                    </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end card body -->
+                                </div>
+                                <!-- end card -->
+                            </div>
+                            <!-- end tab pane -->
+
+                        </div>
+                        <!-- end tab content -->
+                    </div>
+                    <!-- end col -->
+
+                    <div class="col-xl-4 col-lg-4">
+
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Socials</h5>
+                            </div>
+                            <div class="card-body">
+                                <div>
+
+                                    <div class="pt-3">
+                                        <h5 class="font-size-15">Website:</h5>
+                                        <div class="text-muted">
+                                            <p>
+                                                {{ object.website_company }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3">
+                                        <h5 class="font-size-15">Linked In:</h5>
+                                        <div class="text-muted">
+                                            <p>
+                                                {{ object.linkedin_company }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3">
+                                        <h5 class="font-size-15">Facebook:</h5>
+                                        <div class="text-muted">
+                                            <p>
+                                                {{ object.facebook_company }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3">
+                                        <h5 class="font-size-15">X:</h5>
+                                        <div class="text-muted">
+                                            <p>
+                                                {{ object.facebook_company }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end card body -->
+                        </div>
+                        <!-- end card -->
+                    </div>
+                    <!-- end col -->
+                </div>
+                <!-- end row -->
+                
+            </div> <!-- container-fluid -->
         </div>
-        <!-- end main content-->
+        <!-- End Page-content -->
+
+        
+    {% block footer %}
+        {% include 'partials/footer.html' %}
+    {% endblock footer %}
+    </div>
+    <!-- end main content-->
 {% endblock content %}
 
 {% block extra_js %}

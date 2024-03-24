@@ -1,25 +1,27 @@
-import calendar, json
-from typing import Any
-from django.db.models import Q
-from django.core.serializers.json import DjangoJSONEncoder
+import json
 from datetime import datetime, timedelta
-from django.db import models
-from django.http.response import HttpResponse
-from django.utils import timezone
-from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
+
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
+from django.http.response import HttpResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
+from django.views import View
 from django.views.generic import TemplateView
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
+from django.db import models
+from django.db.models import Q
+from django import forms
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from .models import (
-    Employee, Client, Company, Owner,
-    ConferenceRoom, Booking, Building
-)
-from .forms import BookingForm
-from .helper import ModelInstanceGetter, JsonResponseHelper
+
+from .helper import *
+from .models import *
+from .forms import *
+
 
 # ---------------------------------------------
 #             AJAX functions
@@ -85,6 +87,7 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def get_booking(request):
+        ''' This method is currently not being used '''
         pass
         # try:
         #     if not booking_id:
@@ -102,9 +105,9 @@ class AjaxFunctionsView(LoginRequiredMixin, TemplateView):
         # } if query else {}
         # return JsonResponse(response)
 
-    ''' This method is currently not being used '''
     @staticmethod
     def search_clients(request):
+        ''' This method is currently not being used '''
         # Parameters
         search = request.GET.get('search_query')
 
@@ -326,55 +329,114 @@ apps_booking_calendar_view = EcommerceBookingView.as_view()
 
 class UserView(LoginRequiredMixin, TemplateView):
 
-    profile_model_templates = {
-        'user': (User, "apps/profiles/apps-users-profile-user.html"),
-        'client': (Client, "apps/profiles/apps-users-profile-client.html"),
-        'company': (Company, "apps/profiles/apps-users-profile-company.html"),
-        'owner': (Owner, "apps/profiles/apps-users-profile-owner.html"),
-        'employee': (Employee, "apps/profiles/apps-users-profile-employee.html"),
+    template_base = lambda _, display, model_str: \
+        f"apps/profiles/apps-users-{display}-{model_str}.html"
+
+    models_forms = {
+        'user': (User, {'new': NewUserForm, 'edit': EditUserForm}),
+        'client': (Client, ClientForm),
+        'company': (Company, CompanyForm),
+        'owner': (Owner, OwnerForm),
+        'employee': (Employee, EmployeeForm),
     }
 
-    list_model_templates = {
-        'user': (User, "apps/profiles/apps-users-list-user.html"),
-        'client': (Client, "apps/profiles/apps-users-list-client.html"),
-        'company': (Company, "apps/profiles/apps-users-list-company.html"),
-        'owner': (Owner, "apps/profiles/apps-users-list-owner.html"),
-        'employee': (Employee, "apps/profiles/apps-users-list-employee.html"),
+    form_dependencies = {
+        'client': ['company', 'owner', 'employee'],
+        'owner': ['company'],
+        'employee': ['company'],
     }
 
+    model_str: str = ''
+    model: models.Model = None
+    form: forms.ModelForm = None
 
-    def get(self, request, *args, **kwargs):
-        context = kwargs.get('context', {})
-        context['profile'] = profile = kwargs.get('profile')
+    def post(self, request, *args, **kwargs):
+        # Always Initial Step, get variables
+        context: dict = kwargs.get('context', {})
         id = kwargs.get('id')
+        self.model_str = context['profile'] = kwargs.get('profile')
 
         # Get the individual object if theres id
         # If not, display the list of objects
-        display_profile = bool(id)
-        if display_profile:
-            model, self.template_name = self.profile_model_templates.get(profile, (None, None))
-            return self._get_object_view(request, model, id, context)
+        is_display_profile = bool(id)
+        display = 'list' if not is_display_profile else 'profile'
+
+        # Set model, form, and template
+        self.model, self.form = self.models_forms[self.model_str]
+        self.template_name = self.template_base(display, self.model_str)
+
+        if self.model == User:
+            self.form = self.form['edit'] if is_display_profile else self.form['new']
+
+        # Set form, if new or if edit
+        form: forms.ModelForm = self.form(request.POST)
+        if id:
+            model_instance = get_object_or_404(self.model, pk=id)
+            form = self.form(request.POST, instance=model_instance)
+
+        if form.is_valid():
+
+            # Save the data
+            if self.model == User: 
+                form.save()
+            else:
+                form.save(user=request.user)
+
+            # redirect to the same URL:
+            return HttpResponseRedirect(request.path) \
+                if display == 'profile' else \
+                redirect('apps:profiles.profile', profile=self.model_str, id=form.instance.pk)
+        
+        # If the form is not valid, re-render the form with error messages
+        context['form'] = form
+        
+        return self.get(request, context=context, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        # Always Initial Step, get variables
+        context = kwargs.get('context', {})
+        id = kwargs.get('id')
+        self.model_str = context['profile'] = kwargs.get('profile')
+
+        # Get the individual object if theres id
+        # If not, display the list of objects
+        is_display_profile = bool(id)
+        display = 'list' if not is_display_profile else 'profile'
+        context['form_url'] = f'apps:profiles.{display}'
+
+        # Set model, form, and template
+        self.model, self.form = self.models_forms[self.model_str]
+        self.template_name = self.template_base(display, self.model_str)
+
+        if self.model == User:
+            self.form = self.form['edit'] if is_display_profile else self.form['new']
+
+        if is_display_profile:
+            return self._get_object_view(request, id, context)
         else:
-            model, self.template_name = self.list_model_templates.get(profile, (None, None))
-            return self._get_list_view(request, model, context)
+            return self._get_list_view(request, context)
 
-
-    def _get_object_view(self, request, model:models.Model, id:int, context:dict) -> HttpResponse:
-        obj = ModelInstanceGetter.get_instance(model, id)
+    def _get_object_view(self, request, id:int, context:dict) -> HttpResponse:
+        obj = ModelInstanceGetter.get_instance(self.model, id)
         key, val = ('object', obj) if obj \
             else ('error', 'No instance found')
 
         # access "object" in view and get details such as
         # object.id, object.name, etc.
         context[key] = val
+        context['form'] = self.form(instance=obj) if not context.get('form') else context['form']
+        context['form_title'] = 'Editing ' + self.model_str.title()
+        context['form_obj_id'] = obj.pk
 
         return render(request, self.template_name, context)
 
-
-    def _get_list_view(self, request, model:models.Model, context:dict) -> HttpResponse:
-        objs = model.objects.all()
+    def _get_list_view(self, request, context:dict) -> HttpResponse:
+        objs = self.model.objects.all()
         context['list'] = objs
-
+        context['form'] = self.form() if not context.get('form') else context['form']
+        context['form_title'] = 'New ' + self.model_str.title()
+        
+        
         return render(request, self.template_name, context)
 
 apps_users_view = UserView.as_view()

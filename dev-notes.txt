@@ -1,4 +1,11 @@
 
+Prerequisites in developing the user interface:
+    - A basic understanding of HTML, CSS and JavaScript
+        > In JavaScript, specifically JQuery
+            - AJAX
+            - Selecting elements and manipulating them with jQuery methods
+
+
 To edit BOOKING (Calendar) function:
     > You may edit the following files
 

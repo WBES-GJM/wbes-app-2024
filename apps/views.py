@@ -339,7 +339,8 @@ class UserView(LoginRequiredMixin, TemplateView):
         'owner': (Owner, OwnerForm),
         'employee': (Employee, EmployeeForm),
     }
-
+    
+    # NOT YET IMPLEMENTED PROPERLY
     form_dependencies = {
         'client': ['company', 'owner', 'employee'],
         'owner': ['company'],
@@ -436,6 +437,10 @@ class UserView(LoginRequiredMixin, TemplateView):
         context['form'] = self.form() if not context.get('form') else context['form']
         context['form_title'] = 'New ' + self.model_str.title()
         
+        # NOT YET IMPLEMENTED PROPERLY
+        # form_depends = self.form_dependencies.get(self.model_str)
+        # if form_depends:
+        #     context['form_depends']
         
         return render(request, self.template_name, context)
 

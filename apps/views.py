@@ -328,65 +328,106 @@ apps_booking_calendar_view = EcommerceBookingView.as_view()
 # ---------------------------------------------
 
 class UserView(LoginRequiredMixin, TemplateView):
-
-    template_base = lambda _, display, model_str: \
-        f"apps/profiles/apps-users-{display}-{model_str}.html"
-
-    models_forms = {
-        'user': (User, {'new': NewUserForm, 'edit': EditUserForm}),
-        'client': (Client, ClientForm),
-        'company': (Company, CompanyForm),
-        'owner': (Owner, OwnerForm),
-        'employee': (Employee, EmployeeForm),
-    }
     
-    # NOT YET IMPLEMENTED PROPERLY
-    form_dependencies = {
-        'client': ['company', 'owner', 'employee'],
-        'owner': ['company'],
-        'employee': ['company'],
-    }
-
-    model_str: str = ''
-    model: models.Model = None
-    form: forms.ModelForm = None
+    def get_template(self, model_str, display_as_profile) -> str:
+        list_templates = {
+            "client": "apps/profiles/apps-users-list-client.html",
+            "company": "apps/profiles/apps-users-list-company.html",
+            "employee": "apps/profiles/apps-users-list-employee.html",
+            "owner": "apps/profiles/apps-users-list-owner.html",
+            "user": "apps/profiles/apps-users-list-user.html",
+        }
+        
+        profile_templates = {
+            "client": "apps/profiles/apps-users-profile-client.html",
+            "company": "apps/profiles/apps-users-profile-company.html",
+            "employee": "apps/profiles/apps-users-profile-employee.html",
+            "owner": "apps/profiles/apps-users-profile-owner.html",
+            "user": "apps/profiles/apps-users-profile-user.html",
+        }
+    
+        if display_as_profile:
+            return profile_templates.get(model_str)
+        else:
+            return list_templates.get(model_str)
+ 
+    def get_model(self, model_str):
+        forms = {
+            'user': User,
+            'client': Client,
+            'company': Company,
+            'owner': Owner,
+            'employee': Employee,
+        }
+        return forms[model_str]
+    
+    def get_form(self, model, post_request=None, id=None):
+        new_obj_forms = {
+            User: NewUserForm,
+            Client: ClientForm,
+            Company: CompanyForm,
+            Owner: OwnerForm,
+            Employee: EmployeeForm,
+        }
+        edit_obj_forms = {
+            User: EditUserForm,
+            Client: ClientForm,
+            Company: CompanyForm,
+            Owner: OwnerForm,
+            Employee: EmployeeForm,
+        }
+        
+        # Post request form (for saving data)
+        if post_request:
+            # Edit object form
+            if bool(id):
+                form = edit_obj_forms[model]
+                model_instance = get_object_or_404(model, pk=id)
+                return form(post_request, instance=model_instance)
+            # New object form
+            else:
+                form = new_obj_forms[model]
+                return form(post_request)
+        
+        # Get request form (for fetching data)
+        else:
+            # Edit object form
+            if bool(id):
+                form = edit_obj_forms[model]
+                obj = ModelInstanceGetter.get_instance(model, id)
+                return form(instance=obj)
+            else:
+                form = new_obj_forms[model]
+                return form()
 
     def post(self, request, *args, **kwargs):
         # Always Initial Step, get variables
         context: dict = kwargs.get('context', {})
         id = kwargs.get('id')
-        self.model_str = context['profile'] = kwargs.get('profile')
+        model_str = context['profile'] = kwargs.get('profile')
+        display_as_profile = bool(id)
+        
+        # Set the model and form
+        model = self.get_model(model_str=model_str)
+        form = self.get_form(model=model, post_request=request.POST, id=id)
 
-        # Get the individual object if theres id
-        # If not, display the list of objects
-        is_display_profile = bool(id)
-        display = 'list' if not is_display_profile else 'profile'
-
-        # Set model, form, and template
-        self.model, self.form = self.models_forms[self.model_str]
-        self.template_name = self.template_base(display, self.model_str)
-
-        if self.model == User:
-            self.form = self.form['edit'] if is_display_profile else self.form['new']
-
-        # Set form, if new or if edit
-        form: forms.ModelForm = self.form(request.POST)
-        if id:
-            model_instance = get_object_or_404(self.model, pk=id)
-            form = self.form(request.POST, instance=model_instance)
-
+        # Process form
         if form.is_valid():
-
             # Save the data
-            if self.model == User: 
+            if model == User: 
                 form.save()
             else:
                 form.save(user=request.user)
 
-            # redirect to the same URL:
-            return HttpResponseRedirect(request.path) \
-                if display == 'profile' else \
-                redirect('apps:profiles.profile', profile=self.model_str, id=form.instance.pk)
+            # If already using profile template, redirect to the same URL
+            if display_as_profile: 
+                HttpResponseRedirect(request.path)
+                
+            # Else, new object was created 
+            # so redirect to the new page with the profile template
+            else:
+                return redirect('apps:profiles.profile', 
+                                profile=model_str, id=form.instance.pk)
         
         # If the form is not valid, re-render the form with error messages
         context['form'] = form
@@ -395,54 +436,61 @@ class UserView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         # Always Initial Step, get variables
-        context = kwargs.get('context', {})
+        context: dict = kwargs.get('context', {})
         id = kwargs.get('id')
-        self.model_str = context['profile'] = kwargs.get('profile')
+        model_str = context['profile'] = kwargs.get('profile')
+        display_as_profile = bool(id)
+        
+        # Set the model and form
+        # Set the template as "profile" for a single object if display_as_profile
+        # If not, display the list of objects instead
+        model = self.get_model(model_str=model_str)
+        template_name = self.get_template(model_str=model_str, 
+                                          display_as_profile=display_as_profile)
 
-        # Get the individual object if theres id
-        # If not, display the list of objects
-        is_display_profile = bool(id)
-        display = 'list' if not is_display_profile else 'profile'
-        context['form_url'] = f'apps:profiles.{display}'
-
-        # Set model, form, and template
-        self.model, self.form = self.models_forms[self.model_str]
-        self.template_name = self.template_base(display, self.model_str)
-
-        if self.model == User:
-            self.form = self.form['edit'] if is_display_profile else self.form['new']
-
-        if is_display_profile:
-            return self._get_object_view(request, id, context)
+        if display_as_profile:
+            context = self.context_for_object(context, model_str, model, id)
         else:
-            return self._get_list_view(request, context)
+            context = self.context_for_list(context, model_str, model)
 
-    def _get_object_view(self, request, id:int, context:dict) -> HttpResponse:
-        obj = ModelInstanceGetter.get_instance(self.model, id)
-        key, val = ('object', obj) if obj \
-            else ('error', 'No instance found')
+        return render(request, template_name, context)
 
-        # access "object" in view and get details such as
-        # object.id, object.name, etc.
-        context[key] = val
-        context['form'] = self.form(instance=obj) if not context.get('form') else context['form']
-        context['form_title'] = 'Editing ' + self.model_str.title()
+    def context_for_object(self, context, model_str, model, id) -> HttpResponse:
+        
+        obj = ModelInstanceGetter.get_instance(model, id)
+        # Access "object" in view and get details such as object.id, object.name, etc.
+        if obj:
+            context['object'] = obj
+        else:
+            context['error'] = 'No instance found'
+                
+        form = context.get('form')
+        if not form:
+            form = self.get_form(model=model, id=id)
+        context['form'] = form
+        context['form_title'] = 'Editing ' + model_str.title()
+        context['form_url'] = 'apps:profiles.profile'
         context['form_obj_id'] = obj.pk
 
-        return render(request, self.template_name, context)
+        return context
 
-    def _get_list_view(self, request, context:dict) -> HttpResponse:
-        objs = self.model.objects.all()
+    def context_for_list(self, context, model_str, model) -> HttpResponse:
+        objs = model.objects.all()
         context['list'] = objs
-        context['form'] = self.form() if not context.get('form') else context['form']
-        context['form_title'] = 'New ' + self.model_str.title()
+        
+        form = context.get('form')
+        if not form:
+            form = self.get_form(model=model)
+        context['form'] = form
+        context['form_title'] = 'New ' + model_str.title()
+        context['form_url'] = 'apps:profiles.list'
         
         # NOT YET IMPLEMENTED PROPERLY
         # form_depends = self.form_dependencies.get(self.model_str)
         # if form_depends:
         #     context['form_depends']
         
-        return render(request, self.template_name, context)
+        return context
 
 apps_users_view = UserView.as_view()
 

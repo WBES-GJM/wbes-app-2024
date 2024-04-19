@@ -441,9 +441,7 @@ class UserView(LoginRequiredMixin, TemplateView):
         model_str = context['profile'] = kwargs.get('profile')
         display_as_profile = bool(id)
         
-        # Set the model and form
-        # Set the template as "profile" for a single object if display_as_profile
-        # If not, display the list of objects instead
+        # Set the model and template as "profile"
         model = self.get_model(model_str=model_str)
         template_name = self.get_template(model_str=model_str, 
                                           display_as_profile=display_as_profile)

@@ -36,15 +36,19 @@
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i data-feather="users"></i>
-                                <span data-key="t-contacts">Accounts</span>
+                                <span data-key="t-contacts">Profiles</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                <!-- <li><a href="{ url 'apps:users.profile' 'account' user.id }" data-key="t-profile">My Profile</a></li> -->
-                                <li><a href="{% url 'apps:users.list' 'client' %}" data-key="t-client-list">Clients</a></li>
-                                <li><a href="{% url 'apps:users.list' 'company' %}" data-key="t-company-list">Companies</a></li>
-                                <li><a href="{% url 'apps:users.list' 'owner' %}" data-key="t-owner-list">Owners</a></li>
-                                <li><a href="{% url 'apps:users.list' 'employee' %}" data-key="t-employee-list">Employees</a></li>
-                                <li><a href="{% url 'apps:users.list' 'user' %}" data-key="t-user-list">Users</a></li>
+                                <li><a href="{% url 'apps:profiles.list' 'client' %}" data-key="t-client-list">Clients</a></li>
+                                <li><a href="{% url 'apps:profiles.list' 'company' %}" data-key="t-company-list">Companies</a></li>
+                                <li>
+                                    <a href="javascript: void(0);" class="has-arrow" data-key="t-level-1-2">Individuals</a>
+                                    <ul class="sub-menu" aria-expanded="true">
+                                        <li><a href="{% url 'apps:profiles.list' 'owner' %}" data-key="t-owner-list">Owners</a></li>
+                                        <li><a href="{% url 'apps:profiles.list' 'employee' %}" data-key="t-employee-list">Employees</a></li>
+                                        <li><a href="{% url 'apps:profiles.list' 'user' %}" data-key="t-user-list">Users</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
 

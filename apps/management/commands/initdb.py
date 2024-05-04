@@ -18,16 +18,16 @@ class Command(BaseCommand):
             {'id': 11, 'username': 'mary', 'password': 'Pass123$'}
         ],
         Company:[
-            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'street_number_company':'95', 'street_name_company': 'Speed', 'city_company': 'Lightning', 'state_company': 'McQueen', 'zip_company': '250', 'main_phone_company': '250', 'home_phone_company': '250', 'main_email_company': 'iamspeed@mcqueen.com', 'timestamp': datetime.now()},
-            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'street_number_company':'12', 'street_name_company': 'Tref', 'city_company': 'Acer', 'state_company': 'Gas', 'zip_company': '421', 'main_phone_company': '412', 'home_phone_company': '531', 'main_email_company': 'iamspeed@yours.com', 'timestamp': datetime.now()},
+            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'street_number_company':'95', 'street_name_company': 'Speed', 'city_company': 'Lightning', 'state_company': 'McQueen', 'zip_company': '250', 'main_phone_company': '250', 'home_phone_company': '250', 'main_email_company': 'iamspeed@mcqueen.com'},
+            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'street_number_company':'12', 'street_name_company': 'Tref', 'city_company': 'Acer', 'state_company': 'Gas', 'zip_company': '421', 'main_phone_company': '412', 'home_phone_company': '531', 'main_email_company': 'iamspeed@yours.com'},
         ],
         Employee: [
-            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'name_prefix_employee': 'Ms.', 'last_name_employee': 'Sample', 'middle_name_employee': 'Mars', 'first_name_employee': 'Kim', 'job_title_employee': 'Staff', 'timestamp': datetime.now()},
-            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'name_prefix_employee': 'Mr.', 'last_name_employee': 'Santa', 'middle_name_employee': 'Yranus', 'first_name_employee': 'Kevin', 'job_title_employee': 'Staff', 'timestamp': datetime.now()},
+            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'name_prefix_employee': 'Ms.', 'last_name_employee': 'Sample', 'middle_name_employee': 'Mars', 'first_name_employee': 'Kim', 'job_title_employee': 'Staff',},
+            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'name_prefix_employee': 'Mr.', 'last_name_employee': 'Santa', 'middle_name_employee': 'Yranus', 'first_name_employee': 'Kevin', 'job_title_employee': 'Staff',},
         ],
         Owner: [
-            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'name_prefix_owner': 'Mr.', 'last_name_owner': 'Saints', 'middle_name_owner': 'Maer', 'first_name_owner': 'Kimberly', 'timestamp': datetime.now() },
-            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'name_prefix_owner': 'Ms.', 'last_name_owner': 'Saens', 'middle_name_owner': 'Yajger', 'first_name_owner': 'Karlson', 'timestamp': datetime.now() },
+            {'id': 1, 'user': 'john', 'company': 'KMS Inc.', 'name_prefix_owner': 'Mr.', 'last_name_owner': 'Saints', 'middle_name_owner': 'Maer', 'first_name_owner': 'Kimberly', },
+            {'id': 2, 'user': 'john', 'company': 'KYS RN Universe', 'name_prefix_owner': 'Ms.', 'last_name_owner': 'Saens', 'middle_name_owner': 'Yajger', 'first_name_owner': 'Karlson', },
         ],
         Virtual: [
             {'id': 1, 'user': 'john', 'package': 'Gold'},
@@ -36,8 +36,8 @@ class Command(BaseCommand):
         ],
         Client: [
             # The EMPLOYEE unique identifier is set to [lastname]-[middlename]-[firstname]
-            {'id': 1, 'user':'john', 'name' : 'KMS Holdings' , 'employee':'Sample-Mars-Kim', 'owner': 'Saints-Maer-Kimberly', 'company': 'KMS Inc.', 'virtual': 'Gold', },
-            {'id': 2, 'user':'john', 'name' : 'The KYS Group' , 'employee':'Santa-Yranus-Kevin', 'owner': 'Saens-Yajger-Karlson', 'company': 'KYS RN Universe', 'virtual': 'Silver',  },
+            {'id': 1, 'users':'john', 'name' : 'KMS Holdings' , 'employee':'Sample-Mars-Kim', 'owner': 'Saints-Maer-Kimberly', 'company': 'KMS Inc.', 'virtual': 'Gold',},
+            {'id': 2, 'users':'john', 'name' : 'The KYS Group' , 'employee':'Santa-Yranus-Kevin', 'owner': 'Saens-Yajger-Karlson', 'company': 'KYS RN Universe', 'virtual': 'Silver',},
         ],
         Building:[
             {'id': 1, 'name':'Santa Ana Suites Extension Building', 'address': '92nd Block, Santa Ana, California'},

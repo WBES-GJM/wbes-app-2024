@@ -28,7 +28,11 @@
                                 <div class="d-flex align-items-end mt-3 mt-sm-0">
                                     <div class="flex-shrink-0">
                                         <div class="avatar-xxl me-3">
+                                            {% if object.logo %}
+                                            <img src="/{{object.logo}}" alt="" class="img-fluid rounded-circle d-block img-thumbnail">
+                                            {% else %}
                                             <img src="{% static 'images/users/avatar-3.jpg'%}" alt="" class="img-fluid rounded-circle d-block img-thumbnail">
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">

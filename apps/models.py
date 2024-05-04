@@ -1,3 +1,4 @@
+import os
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -284,8 +285,13 @@ class Virtual(models.Model):
         return f"Grants {self.package} virtual privileges to clients."
         # return f"{self.user} is a {self.package} virtual customer"
 
-class Company(models.Model):
 
+def get_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (f"{instance.id}-{instance.company.replace(' ', '-').lower()}", ext)
+    return os.path.join(instance.directory_string_var, filename)
+
+class Company(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.CharField(max_length=200, null=True)
     street_number_company = models.CharField(max_length=20, null=True)
@@ -319,7 +325,8 @@ class Company(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     list_of_phone = models.CharField(max_length=1000, blank=True, null=True)
     list_of_email = models.CharField(max_length=1000, blank=True, null=True)
-    logo = models.FileField(upload_to='logos/', blank=True, null=True)
+    logo = models.FileField(upload_to=get_file_path, blank=True, null=True)
+    directory_string_var = 'static/images/wbes-companies'
 
     def save(self, *args, **kwargs):
 

@@ -131,10 +131,10 @@ apps_ajax_get_client = AjaxFunctionsView.get_client
 #               Booking views
 # ---------------------------------------------
 
-class EcommerceBookingView(LoginRequiredMixin, TemplateView, View):
+class EcommerceBookingView(LoginRequiredMixin, TemplateView):
 
     reverse_url = "apps:ecommerce.booking"
-    template_name = "apps/ecommerce/ecommerce-booking.html"
+    template_name = "apps/ecommerce/ecommerce-booking.html" 
 
 
     def format_datetime(self, date: str, hour: int) -> datetime:
@@ -370,10 +370,11 @@ class UserView(LoginRequiredMixin, TemplateView):
             self.form = self.form['edit'] if is_display_profile else self.form['new']
 
         # Set form, if new or if edit
-        form: forms.ModelForm = self.form(request.POST)
-        if id:
+        if id: # edit
             model_instance = get_object_or_404(self.model, pk=id)
-            form = self.form(request.POST, instance=model_instance)
+            form = self.form(request.POST, request.FILES, instance=model_instance)
+        else: # new
+            form = self.form(request.POST, request.FILES)
 
         if form.is_valid():
 
@@ -428,6 +429,8 @@ class UserView(LoginRequiredMixin, TemplateView):
         context['form'] = self.form(instance=obj) if not context.get('form') else context['form']
         context['form_title'] = 'Editing ' + self.model_str.title()
         context['form_obj_id'] = obj.pk
+        
+        context['office_object'] = Office.objects.get(id=1)
 
         return render(request, self.template_name, context)
 

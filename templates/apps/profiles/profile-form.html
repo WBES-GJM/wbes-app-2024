@@ -10,12 +10,12 @@
             </div>
             <div class="modal-body">
                 {% if form_obj_id %}
-                <form id="profileForm" method="post" action="{% url form_url profile form_obj_id %}">
+                <form id="profileForm" method="post" action="{% url form_url profile form_obj_id %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
                 </form>
                 {% else %}
-                <form id="profileForm" method="post" action="{% url form_url profile %}">
+                <form id="profileForm" method="post" action="{% url form_url profile %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
                 </form>
